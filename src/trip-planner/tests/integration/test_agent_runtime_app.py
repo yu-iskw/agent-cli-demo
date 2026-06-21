@@ -17,23 +17,21 @@ import logging
 import pytest
 from google.adk.events.event import Event
 
-from app.agent_runtime_app import AgentEngineApp
+from app.agent_runtime_app import AgentEngineApp, agent_runtime
 
 
-@pytest.fixture
-def agent_app(monkeypatch: pytest.MonkeyPatch) -> AgentEngineApp:
+@pytest.fixture(name="runtime_app")
+def runtime_app_fixture(monkeypatch: pytest.MonkeyPatch) -> AgentEngineApp:
     """Fixture to create and set up AgentEngineApp instance"""
     # Set integration test flag to mock external services
     monkeypatch.setenv("INTEGRATION_TEST", "TRUE")
-
-    from app.agent_runtime_app import agent_runtime
 
     agent_runtime.set_up()
     return agent_runtime
 
 
 @pytest.mark.asyncio
-async def test_agent_stream_query(agent_app: AgentEngineApp) -> None:
+async def test_agent_stream_query(runtime_app: AgentEngineApp) -> None:
     """
     Integration test for the agent stream query functionality.
     Tests that the agent returns valid streaming responses.
@@ -41,7 +39,7 @@ async def test_agent_stream_query(agent_app: AgentEngineApp) -> None:
     # Create message and events for the async_stream_query
     message = "Hi!"
     events = []
-    async for event in agent_app.async_stream_query(message=message, user_id="test"):
+    async for event in runtime_app.async_stream_query(message=message, user_id="test"):
         events.append(event)
     assert len(events) > 0, "Expected at least one chunk in response"
 
@@ -61,7 +59,7 @@ async def test_agent_stream_query(agent_app: AgentEngineApp) -> None:
     assert has_text_content, "Expected at least one event with text content"
 
 
-def test_agent_feedback(agent_app: AgentEngineApp) -> None:
+def test_agent_feedback(runtime_app: AgentEngineApp) -> None:
     """
     Integration test for the agent feedback functionality.
     Tests that feedback can be registered successfully.
@@ -74,7 +72,7 @@ def test_agent_feedback(agent_app: AgentEngineApp) -> None:
     }
 
     # Should not raise any exceptions
-    agent_app.register_feedback(feedback_data)
+    runtime_app.register_feedback(feedback_data)
 
     # Test invalid feedback
     with pytest.raises(ValueError):
@@ -84,6 +82,6 @@ def test_agent_feedback(agent_app: AgentEngineApp) -> None:
             "user_id": "test-user-789",
             "session_id": "test-session-789",
         }
-        agent_app.register_feedback(invalid_feedback)
+        runtime_app.register_feedback(invalid_feedback)
 
     logging.info("All assertions passed for agent feedback test")

@@ -6,7 +6,7 @@ authors = [{ name = "Your Name", email = "your@email.com" }]
 
 
 dependencies = [
-  "google-adk[gcp]>=2.0.0,<3.0.0",
+  "google-adk[gcp,a2a]>=2.0.0,<3.0.0",
   "a2a-sdk[http-server]~=0.3.22",
   "opentelemetry-instrumentation-google-genai>=0.1.0,<1.0.0",
   "gcsfs>=2024.11.0",
@@ -22,6 +22,7 @@ dev = [
   "pytest>=9.0.2,<10.0.0",
   "pytest-asyncio>=1.0.0,<2.0.0",
   "nest-asyncio>=1.6.0,<2.0.0",
+  "types-protobuf>=7.34.1",
 ]
 
 [project.optional-dependencies]

@@ -20,16 +20,57 @@ SCRIPT_FILE="$(readlink -f "$0")"
 SCRIPT_DIR="$(dirname "${SCRIPT_FILE}")"
 MODULE_DIR="$(dirname "${SCRIPT_DIR}")"
 
-# All …/tests dirs under src in one pytest run; absolute --cov path avoids editable-install quirks.
-mapfile -d '' TEST_DIRS < <(find "${MODULE_DIR}/src" -name "tests" -type d -print0) || true
-if [[ ${#TEST_DIRS[@]} -eq 0 ]]; then
-	echo "error: no tests directories found under ${MODULE_DIR}/src" >&2
+failures=0
+
+# Template package tests (when present) use the root virtualenv.
+if [[ -d "${MODULE_DIR}/src/your_package/tests" ]]; then
+	echo "==> Testing template package"
+	if ! (
+		cd "${MODULE_DIR}"
+		uv run pytest -v -s --cache-clear \
+			--cov="${MODULE_DIR}/src/your_package" \
+			--cov-report=term-missing \
+			--cov-report=xml \
+			"src/your_package/tests"
+	); then
+		failures=$((failures + 1))
+	fi
+fi
+
+# Agent projects ship their own pyproject.toml and virtualenvs.
+for agent_dir in "${MODULE_DIR}"/src/*/; do
+	if [[ ! -f "${agent_dir}/pyproject.toml" || ! -d "${agent_dir}/tests" ]]; then
+		continue
+	fi
+	if [[ ${agent_dir} == *"/your_package/" ]]; then
+		continue
+	fi
+
+	echo "==> Testing ${agent_dir}"
+	if ! (
+		cd "${agent_dir}"
+		uv run pytest -v -s --cache-clear
+	); then
+		failures=$((failures + 1))
+	fi
+done
+
+if [[ ${failures} -gt 0 ]]; then
+	echo "error: ${failures} test suite(s) failed" >&2
 	exit 1
 fi
 
-cd "${MODULE_DIR}"
-uv run pytest -v -s --cache-clear \
-	--cov="${MODULE_DIR}/src/your_package" \
-	--cov-report=term-missing \
-	--cov-report=xml \
-	"${TEST_DIRS[@]}"
+ran_any=0
+if [[ -d "${MODULE_DIR}/src/your_package/tests" ]]; then
+	ran_any=1
+fi
+for agent_dir in "${MODULE_DIR}"/src/*/; do
+	if [[ -f "${agent_dir}/pyproject.toml" && -d "${agent_dir}/tests" && ${agent_dir} != *"/your_package/" ]]; then
+		ran_any=1
+		break
+	fi
+done
+if [[ ${ran_any} -eq 0 ]]; then
+	echo "error: no tests directories found under ${MODULE_DIR}/src" >&2
+	exit 1
+fi

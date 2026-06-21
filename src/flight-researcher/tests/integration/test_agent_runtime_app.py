@@ -16,7 +16,7 @@ import os
 
 import pytest
 
-from app.agent_runtime_app import AgentEngineApp
+from app.agent_runtime_app import AgentEngineApp, agent_runtime
 from tests.helpers import (
     build_get_request,
     build_post_request,
@@ -24,20 +24,18 @@ from tests.helpers import (
 )
 
 
-@pytest.fixture
-def agent_app(monkeypatch: pytest.MonkeyPatch) -> AgentEngineApp:
+@pytest.fixture(name="runtime_app")
+def runtime_app_fixture(monkeypatch: pytest.MonkeyPatch) -> AgentEngineApp:
     """Fixture to create and set up AgentEngineApp instance"""
     # Set integration test flag to mock external services
     monkeypatch.setenv("INTEGRATION_TEST", "TRUE")
-
-    from app.agent_runtime_app import agent_runtime
 
     agent_runtime.set_up()
     return agent_runtime
 
 
 @pytest.mark.asyncio
-async def test_agent_on_message_send(agent_app: AgentEngineApp) -> None:
+async def test_agent_on_message_send(runtime_app: AgentEngineApp) -> None:
     """Test complete A2A message workflow from send to task completion with artifacts."""
     # Send message
     message_data = {
@@ -47,7 +45,7 @@ async def test_agent_on_message_send(agent_app: AgentEngineApp) -> None:
             "role": "ROLE_USER",
         },
     }
-    response = await agent_app.on_message_send(
+    response = await runtime_app.on_message_send(
         request=build_post_request(message_data),
         context=None,
     )
@@ -58,7 +56,7 @@ async def test_agent_on_message_send(agent_app: AgentEngineApp) -> None:
     )
 
     # Poll for completion
-    final_response = await poll_task_completion(agent_app, response["task"]["id"])
+    final_response = await poll_task_completion(runtime_app, response["task"]["id"])
 
     # Verify artifacts
     assert final_response.get("artifacts"), "Expected artifacts in completed task"
@@ -69,9 +67,9 @@ async def test_agent_on_message_send(agent_app: AgentEngineApp) -> None:
 
 
 @pytest.mark.asyncio
-async def test_agent_card(agent_app: AgentEngineApp) -> None:
+async def test_agent_card(runtime_app: AgentEngineApp) -> None:
     """Test agent card retrieval and validation of required A2A fields."""
-    response = await agent_app.handle_authenticated_agent_card(
+    response = await runtime_app.handle_authenticated_agent_card(
         request=build_get_request(None),
         context=None,
     )

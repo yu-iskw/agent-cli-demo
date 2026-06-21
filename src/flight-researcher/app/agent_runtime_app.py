@@ -31,17 +31,24 @@ from vertexai.preview.reasoning_engines import A2aAgent
 
 from app.agent import app as adk_app
 from app.app_utils.a2a_deploy_shim import (
+    get_pydantic_agent_card,
     install_deploy_agent_card_shim,
     restore_pydantic_agent_card,
+    run_register_operations_with_card,
 )
+from app.app_utils.feedback_models import Feedback
 from app.app_utils.telemetry import setup_telemetry
-from app.app_utils.typing import Feedback
 
 # Load environment variables from .env file at runtime
 load_dotenv()
 
 
+gemini_location = os.environ.get("GOOGLE_CLOUD_LOCATION")
+
+
 class AgentEngineApp(A2aAgent):
+    """ADK Agent Runtime wrapper with A2A executor and deploy AgentCard shim."""
+
     @staticmethod
     def create(
         app: App | None = None,
@@ -70,6 +77,7 @@ class AgentEngineApp(A2aAgent):
             # Running event loop detected - enable nested asyncio.run()
             nest_asyncio.apply()
         except RuntimeError:
+            # No running event loop — asyncio.run() below is safe.
             pass
 
         agent_card = asyncio.run(AgentEngineApp.build_agent_card(app=app))
@@ -84,8 +92,11 @@ class AgentEngineApp(A2aAgent):
     @staticmethod
     async def build_agent_card(app: App) -> AgentCard:
         """Builds the Agent Card dynamically from the app."""
+        root_agent = app.root_agent
+        if root_agent is None:
+            raise ValueError("App must define root_agent before building AgentCard")
         agent_card_builder = AgentCardBuilder(
-            agent=app.root_agent,
+            agent=root_agent,
             # Agent Runtime does not support streaming yet
             capabilities=AgentCapabilities(
                 streaming=False,
@@ -123,14 +134,15 @@ class AgentEngineApp(A2aAgent):
 
     def register_operations(self) -> dict[str, list[str]]:
         """Registers the operations of the Agent."""
-        pydantic_card = getattr(self, "_pydantic_agent_card", None)
-        saved_card = self.agent_card
+        pydantic_card = get_pydantic_agent_card(self)
         if pydantic_card is not None:
-            self.agent_card = pydantic_card
-        try:
+            operations = run_register_operations_with_card(
+                self,
+                pydantic_card,
+                super().register_operations,
+            )
+        else:
             operations = super().register_operations()
-        finally:
-            self.agent_card = saved_card
         operations[""] = [*operations.get("", []), "register_feedback"]
         return operations
 
@@ -139,7 +151,6 @@ class AgentEngineApp(A2aAgent):
         return self
 
 
-gemini_location = os.environ.get("GOOGLE_CLOUD_LOCATION")
 logs_bucket_name = os.environ.get("LOGS_BUCKET_NAME")
 agent_runtime = AgentEngineApp.create(
     app=adk_app,

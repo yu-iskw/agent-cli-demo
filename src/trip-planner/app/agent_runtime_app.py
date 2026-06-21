@@ -22,14 +22,19 @@ from google.cloud import logging as google_cloud_logging
 from vertexai.agent_engines.templates.adk import AdkApp
 
 from app.agent import app as adk_app
+from app.app_utils.feedback_models import Feedback
 from app.app_utils.telemetry import setup_telemetry
-from app.app_utils.typing import Feedback
 
 # Load environment variables from .env file at runtime
 load_dotenv()
 
 
+gemini_location = os.environ.get("GOOGLE_CLOUD_LOCATION")
+
+
 class AgentEngineApp(AdkApp):
+    """ADK Agent Runtime wrapper for the trip-planner orchestrator."""
+
     def set_up(self) -> None:
         """Initialize the agent engine app with logging and telemetry."""
         vertexai.init()
@@ -57,7 +62,6 @@ class AgentEngineApp(AdkApp):
         return self
 
 
-gemini_location = os.environ.get("GOOGLE_CLOUD_LOCATION")
 logs_bucket_name = os.environ.get("LOGS_BUCKET_NAME")
 agent_runtime = AgentEngineApp(
     app=adk_app,

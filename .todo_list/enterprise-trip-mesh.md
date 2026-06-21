@@ -22,9 +22,12 @@ Project: `yexperiment` | Region: `asia-northeast1` | Private only
 
 ## Milestone 3 — Gateway + mesh governance
 
-- [ ] M3-1: Register all agents in Agent Registry (console — see `docs/guides/04-mesh-governance.md`)
-- [ ] M3-2: Agent Gateway + OAuth ingress (requires OAuth client + real Google Groups)
-- [ ] M3-3: Agent-to-agent IAP policies (`terraform/policies/`, post-registry)
-- [x] M3-4: Persona tests (local `MESH_USER_PERSONA` + unit tests; platform negative tests after M3-2/3)
+- [x] M3-1: Register all agents in Agent Registry (auto on deploy; discovery in `docs/notes/2026-06-21-m3-discovery.md`)
+- [x] M3-2a: IAM ingress on trip-planner (ADC user; curl smoke test in `docs/guides/03-auth-gateway.md`)
+- [ ] M3-2b: Agent Gateway + OAuth ingress (requires OAuth client + real Google Groups + `AUTH_PROVIDER_BINDING`)
+- [x] M3-3: Agent-to-agent IAP egress policies applied (flight/hotel; `--resource-type=agent-registry`, registry UIDs)
+- [x] M3-3b: Registry services created (3) via `apply_mesh_governance.sh`
+- [ ] M3-3c: Registry bindings trip-planner→flight/hotel (blocked until `AUTH_PROVIDER_BINDING`)
+- [x] M3-4: Persona tests (local `MESH_USER_PERSONA` + 37 unit tests; platform gateway tests deferred to M3-2b)
 - [x] M3-5: `docs/guides/03-auth-gateway.md`, `04-mesh-governance.md`
-- [x] M3-6: `docs/notes/ACCEPTANCE.md`
+- [x] M3-6: `docs/notes/ACCEPTANCE.md`, `2026-06-21-m3-platform-tests.md`

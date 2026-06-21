@@ -10,81 +10,65 @@
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
+# See the License for the License for the specific language governing permissions and
 # limitations under the License.
 
 import os
 
 import google.auth
 from google.adk.agents import Agent
-from google.adk.agents.callback_context import CallbackContext
 from google.adk.agents.remote_a2a_agent import RemoteA2aAgent
 from google.adk.apps import App
 from google.adk.models import Gemini
-from google.adk.tools import AgentTool
 from google.genai import types
 
-from app.mesh_auth import current_persona, user_may_use_trip_planner
-from app.tools import delegate_flight_search, delegate_hotel_search
+from app.a2a_auth import create_authenticated_httpx_client
+from app.specialist_cards import flight_agent_card, hotel_agent_card
 
 _, project_id = google.auth.default()
-os.environ["GOOGLE_CLOUD_PROJECT"] = project_id
+if project_id is not None:
+    os.environ["GOOGLE_CLOUD_PROJECT"] = project_id
 os.environ["GOOGLE_CLOUD_LOCATION"] = os.environ.get("GOOGLE_CLOUD_LOCATION", "global")
 os.environ["GOOGLE_GENAI_USE_VERTEXAI"] = "True"
 
-DEFAULT_FLIGHT_CARD = "http://127.0.0.1:8001/a2a/app/.well-known/agent-card.json"
-DEFAULT_HOTEL_CARD = "http://127.0.0.1:8002/a2a/app/.well-known/agent-card.json"
+_a2a_http_client = create_authenticated_httpx_client()
 
+flight_researcher = RemoteA2aAgent(
+    name="flight_researcher",
+    description=(
+        "Flight search specialist on Agent Platform. Delegate origin/destination "
+        "flight queries here."
+    ),
+    agent_card=flight_agent_card(),
+    httpx_client=_a2a_http_client,
+    use_legacy=False,
+)
 
-def _remote_agents() -> list[AgentTool]:
-    """Remote A2A specialists when card URLs are configured and mocks disabled."""
-    if os.environ.get("USE_MESH_MOCKS", "true").lower() == "true":
-        return []
-
-    tools: list[AgentTool] = []
-    flight_card = os.environ.get("FLIGHT_A2A_CARD_URL", DEFAULT_FLIGHT_CARD)
-    hotel_card = os.environ.get("HOTEL_A2A_CARD_URL", DEFAULT_HOTEL_CARD)
-
-    flight_remote = RemoteA2aAgent(
-        name="flight_researcher",
-        description="Searches flights between cities via A2A.",
-        agent_card=flight_card,
-    )
-    hotel_remote = RemoteA2aAgent(
-        name="hotel_researcher",
-        description="Searches hotels in a destination city via A2A.",
-        agent_card=hotel_card,
-    )
-    tools.append(AgentTool(flight_remote))
-    tools.append(AgentTool(hotel_remote))
-    return tools
-
-
-async def enforce_trip_planner_auth(callback_context: CallbackContext) -> None:
-    persona = current_persona(callback_context.state.get("mesh_user_persona"))
-    callback_context.state["mesh_user_persona"] = persona
-    if not user_may_use_trip_planner(persona):
-        callback_context.state["mesh_auth_denied"] = (
-            f"AUTH_ERROR: persona '{persona}' is not permitted to use trip-planner."
-        )
-
+hotel_researcher = RemoteA2aAgent(
+    name="hotel_researcher",
+    description=(
+        "Hotel search specialist on Agent Platform. Delegate destination lodging "
+        "queries here."
+    ),
+    agent_card=hotel_agent_card(),
+    httpx_client=_a2a_http_client,
+    use_legacy=False,
+)
 
 root_agent = Agent(
     name="root_agent",
     model=Gemini(
-        model="gemini-flash-latest",
+        model="gemini-3.1-flash-lite",
         retry_options=types.HttpRetryOptions(attempts=3),
     ),
-    description="Orchestrates trip planning by delegating to flight and hotel specialists.",
+    description="Orchestrates trip planning by delegating to flight and hotel A2A specialists.",
     instruction=(
-        "You are the trip-planner orchestrator. For trips, call delegate_flight_search "
-        "and delegate_hotel_search. If a tool returns auth_denied, explain the AUTH_ERROR "
-        "to the user and continue with permitted sections only. "
-        "If mesh_auth_denied is set in state, respond with that message. "
-        "Produce a concise trip plan with flights and hotels when allowed."
+        "You are the trip-planner orchestrator on Gemini Enterprise Agent Platform. "
+        "For every trip request: (1) transfer to flight_researcher for flights, "
+        "(2) transfer to hotel_researcher for hotels at the destination. "
+        "Combine both specialist responses into one concise trip plan."
     ),
-    tools=[delegate_flight_search, delegate_hotel_search, *_remote_agents()],
-    before_agent_callback=enforce_trip_planner_auth,
+    sub_agents=[flight_researcher, hotel_researcher],
 )
 
 app = App(

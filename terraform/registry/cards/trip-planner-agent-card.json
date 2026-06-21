@@ -1,0 +1,21 @@
+{
+  "name": "trip-planner",
+  "version": "0.1.0",
+  "description": "Orchestrates trip planning by delegating to flight and hotel specialists.",
+  "protocolVersion": "0.3.0",
+  "preferredTransport": "HTTP+JSON",
+  "defaultInputModes": ["text/plain"],
+  "defaultOutputModes": ["text/plain"],
+  "url": "https://asia-northeast1-aiplatform.googleapis.com/v1/projects/844279876229/locations/asia-northeast1/reasoningEngines/2912483156676313088:query",
+  "capabilities": {
+    "streaming": false
+  },
+  "skills": [
+    {
+      "id": "root_agent",
+      "name": "model",
+      "description": "Trip planner orchestrator",
+      "tags": ["llm"]
+    }
+  ]
+}

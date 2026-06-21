@@ -5,7 +5,7 @@ Agent generated with `agents-cli` version `0.5.0`
 
 ## Project Structure
 
-```
+```text
 hotel-researcher/
 ├── app/         # Core agent code
 │   ├── agent.py               # Main agent logic

@@ -18,6 +18,6 @@ agents-cli eval run --project yexperiment --region global
 
 ## Notes
 
-- Use `--region global` for Gemini inference; default manifest region `asia-northeast1` causes model 404 for `gemini-flash-latest`.
+- Use `--region global` for Gemini inference; default manifest region `asia-northeast1` may cause model 404 for some Gemini IDs (e.g. `gemini-3.1-flash-lite`).
 - Agent `app/agent.py` defaults `GOOGLE_CLOUD_LOCATION` to `global` for local run; Agent Runtime deploy region remains `asia-northeast1`.
 - Re-run after deploy with `agents-cli eval compare` against these baselines.

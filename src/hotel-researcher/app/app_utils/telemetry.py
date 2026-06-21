@@ -51,22 +51,25 @@ def setup_telemetry() -> str | None:
         )
     else:
         logging.info(
-            "Prompt-response logging disabled (set LOGS_BUCKET_NAME=gs://your-bucket and OTEL_INSTRUMENTATION_GENAI_CAPTURE_MESSAGE_CONTENT=NO_CONTENT to enable)"
+            "Prompt-response logging disabled "
+            "(set LOGS_BUCKET_NAME=gs://your-bucket and "
+            "OTEL_INSTRUMENTATION_GENAI_CAPTURE_MESSAGE_CONTENT=NO_CONTENT to enable)"
         )
 
     # Set up OpenTelemetry exporters for Cloud Trace and Cloud Logging
     credentials, project_id = google.auth.default()
-    otel_hooks = get_gcp_exporters(
-        enable_cloud_tracing=True,
-        enable_cloud_metrics=False,
-        enable_cloud_logging=True,
-        google_auth=(credentials, project_id),
-    )
-    otel_resource = get_gcp_resource(project_id)
-    maybe_set_otel_providers(
-        otel_hooks_to_setup=[otel_hooks],
-        otel_resource=otel_resource,
-    )
+    if project_id is not None:
+        otel_hooks = get_gcp_exporters(
+            enable_cloud_tracing=True,
+            enable_cloud_metrics=False,
+            enable_cloud_logging=True,
+            google_auth=(credentials, project_id),
+        )
+        otel_resource = get_gcp_resource(project_id)
+        maybe_set_otel_providers(
+            otel_hooks_to_setup=[otel_hooks],
+            otel_resource=otel_resource,
+        )
 
     # Set up GenAI SDK instrumentation
     _setup_instrumentation_lib_if_installed()

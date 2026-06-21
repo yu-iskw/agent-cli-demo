@@ -4,7 +4,7 @@
 
 `agents-cli deploy` failed during agent introspection for A2A specialists:
 
-```
+```text
 AttributeError: 'AgentCard' object has no attribute 'DESCRIPTOR'
 ```
 
@@ -22,7 +22,7 @@ All three agents deployed successfully. See `docs/notes/2026-06-21-deploy-endpoi
 
 Deploy with both `--service-account` and `--agent-identity` returns:
 
-```
+```text
 Cannot set spec.service_account when spec.identity_type is AGENT_IDENTITY
 ```
 

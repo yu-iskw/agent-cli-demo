@@ -190,6 +190,9 @@ terraform/.terraform/
 terraform/*.tfstate
 terraform/*.tfstate.*
 
+# Resolved IAP policies (project-specific agent principals)
+terraform/policies/*.resolved.json
+
 # Agent eval traces (keep grade_results baselines in git if desired)
 **/artifacts/traces/
 
