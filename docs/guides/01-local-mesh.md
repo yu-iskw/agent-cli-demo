@@ -1,16 +1,33 @@
 # 01 — Local mesh
 
-Develop and test the trip-planner mesh before or alongside platform deploy. This guide covers **software architecture**, **local dev modes**, and **offline eval**.
+Develop and test the trip-planner mesh **before** or **alongside** cloud deploy. This guide walks from a single-agent warm-up to the full three-agent A2A mesh.
 
-## Prerequisites
+**Previous:** [00 — Overview](00-overview.md) | **Next:** [02 — IAM deploy](02-iam-deploy.md)
 
-- `agents-cli` 0.5.x (`uv tool install google-agents-cli`)
-- Python 3.11+
-- GCP auth for Vertex eval (optional for unit tests)
+---
 
-## Software architecture
+## What you will learn
 
-Each agent is an ADK **`App`** with a **`root_agent`**. Trip-planner adds **`RemoteA2aAgent`** sub-agents; specialists expose tools only (no orchestration).
+- How the three agents are laid out in this repo
+- How to run **unit tests** without GCP
+- How to query the **deployed** orchestrator with `agents-cli run`
+- How **offline eval** fits into LLMOps
+- The difference between local dev and platform governance
+
+---
+
+## Concepts
+
+### One agent vs a mesh
+
+| Pattern                | When to use                             | This repo                                                   |
+| ---------------------- | --------------------------------------- | ----------------------------------------------------------- |
+| **Single agent**       | One LLM + tools, no delegation          | Specialists alone (`flight-researcher`, `hotel-researcher`) |
+| **Orchestrator + A2A** | One agent delegates to others over HTTP | `trip-planner` → specialists via `RemoteA2aAgent`           |
+
+A **mesh** here means: one entry agent (trip-planner) that calls specialist agents over **A2A** (`message:send`). Governance (who may call whom) lives on Agent Platform—not in Python.
+
+### Software architecture
 
 ```mermaid
 flowchart TB
@@ -18,7 +35,7 @@ flowchart TB
     TPAgent["agent.py<br/>Agent + sub_agents"]
     TPA2A["a2a_auth.py<br/>GoogleCloudAuth httpx"]
     TPCards["specialist_cards.py<br/>+ app/cards/*.json"]
-    TPRuntime["agent_runtime_app.py<br/>AgentEngineApp"]
+    TPRuntime["agent_runtime_app.py"]
     TPAgent --> TPA2A
     TPAgent --> TPCards
     TPRuntime --> TPAgent
@@ -27,9 +44,7 @@ flowchart TB
   subgraph FR["src/flight-researcher"]
     FRAgent["agent.py + search_flights"]
     FRRuntime["agent_runtime_app.py<br/>A2aAgentExecutor"]
-    FRShim["a2a_deploy_shim.py"]
     FRRuntime --> FRAgent
-    FRRuntime --> FRShim
   end
 
   subgraph HR["src/hotel-researcher"]
@@ -42,52 +57,72 @@ flowchart TB
   TPAgent -->|"RemoteA2aAgent"| HRRuntime
 ```
 
-| Component        | Location                                                          | Role                                                  |
-| ---------------- | ----------------------------------------------------------------- | ----------------------------------------------------- |
-| Orchestrator     | `trip-planner/app/agent.py`                                       | Transfers to `flight_researcher` / `hotel_researcher` |
-| Outbound auth    | `trip-planner/app/a2a_auth.py`                                    | ADC bearer tokens on A2A HTTP                         |
-| Bundled cards    | `trip-planner/app/cards/`                                         | Specialist AgentCard JSON (no deploy env URLs)        |
-| Specialist tools | `flight-researcher/app/tools.py`, `hotel-researcher/app/tools.py` | Mock flight/hotel search                              |
+| Component        | Path                                   | Role                                      |
+| ---------------- | -------------------------------------- | ----------------------------------------- |
+| Orchestrator     | `trip-planner/app/agent.py`            | Transfers to flight/hotel sub-agents      |
+| Outbound auth    | `trip-planner/app/a2a_auth.py`         | ADC bearer tokens on A2A HTTP             |
+| Bundled cards    | `trip-planner/app/cards/*.json`        | Specialist AgentCard JSON (deployed URLs) |
+| Specialist tools | `flight-researcher/app/tools.py`, etc. | Mock flight/hotel search                  |
 
-Governance is **not** implemented in Python—see [04-mesh-governance.md](04-mesh-governance.md).
+---
 
-## Unit tests (no GCP)
+## Prerequisites
+
+| Requirement                        | How to check                                                          |
+| ---------------------------------- | --------------------------------------------------------------------- |
+| Python 3.11+                       | `python --version`                                                    |
+| [uv](https://docs.astral.sh/uv/)   | `uv --version`                                                        |
+| `agents-cli` 0.5.x                 | `agents-cli --version` (install: `uv tool install google-agents-cli`) |
+| GCP auth (for eval / deployed run) | `gcloud auth application-default login`                               |
+
+Optional one-time setup:
+
+```bash
+uvx google-agents-cli setup
+```
+
+---
+
+## Walkthrough
+
+### Lab 0 — Install dependencies (one agent)
+
+Get comfortable with Agent CLI on a **single** specialist before the mesh.
+
+```bash
+cd src/flight-researcher
+agents-cli install
+uv run pytest tests/unit/ -q
+```
+
+**What happened:** `agents-cli install` runs `uv sync` for that agent's venv. Unit tests exercise tools and agent wiring without network calls.
+
+### Lab 1 — Unit tests (all three agents, no GCP)
 
 ```bash
 cd src/flight-researcher && uv run pytest tests/unit/ -q
-cd src/hotel-researcher && uv run pytest tests/unit/ -q
-cd src/trip-planner && uv run pytest tests/unit/ -q
+cd ../hotel-researcher && uv run pytest tests/unit/ -q
+cd ../trip-planner && uv run pytest tests/unit/ -q
 ```
 
-Orchestration wiring: `src/trip-planner/tests/unit/test_a2a_mesh.py`.
+Orchestration wiring is asserted in `src/trip-planner/tests/unit/test_a2a_mesh.py`:
 
-## Dev modes
+- Two `RemoteA2aAgent` sub-agents named `flight_researcher` and `hotel_researcher`
+- Bundled AgentCards validate and reference deployed engine IDs
 
-Three ways to exercise the mesh locally:
+### Lab 2 — Deployed mesh (recommended)
 
-```mermaid
-flowchart TD
-  Start["Choose dev mode"]
-  U["Unit tests<br/>pytest — no network"]
-  D["Deployed mesh<br/>agents-cli run --url"]
-  L["Full local A2A<br/>3 terminals localhost"]
-
-  Start --> U
-  Start --> D
-  Start --> L
-```
-
-### Mode A — Deployed mesh (recommended)
-
-Query the live Agent Runtime orchestrator; A2A delegation hits deployed specialists.
+Query the live Agent Runtime orchestrator; A2A delegation hits **deployed** specialists.
 
 ```bash
 cd src/trip-planner
-agents-cli run --url <trip-planner-engine-url> --mode adk \
+agents-cli run --url \
+  "https://asia-northeast1-aiplatform.googleapis.com/v1beta1/projects/yexperiment/locations/asia-northeast1/reasoningEngines/2464937943706370048" \
+  --mode adk \
   "Plan a trip from NYC to San Francisco with flights and hotels."
 ```
 
-Engine URLs: [`docs/notes/2026-06-21-deploy-endpoints.md`](../notes/2026-06-21-deploy-endpoints.md).
+Engine URLs and console links: [`docs/notes/2026-06-21-deploy-endpoints.md`](../notes/2026-06-21-deploy-endpoints.md).
 
 ```mermaid
 sequenceDiagram
@@ -109,48 +144,107 @@ sequenceDiagram
   CLI-->>Dev: response
 ```
 
-### Mode B — Full local A2A (three terminals)
+**Alternative:** Use the [Console playground](https://console.cloud.google.com/vertex-ai/agents/agent-engines/locations/asia-northeast1/agent-engines/2464937943706370048/playground?project=yexperiment) with the same prompt.
 
-Run specialists as local A2A servers; override bundled cards with localhost URLs (**development only**).
+### Lab 3 — Local playground (orchestrator only, no A2A)
+
+Run trip-planner locally for UI iteration. Sub-agents still call **deployed** specialist URLs from bundled cards.
 
 ```bash
-# Terminal 1 — flight
-cd src/flight-researcher && agents-cli install && agents-cli run --agent adk_a2a --port 8001
-
-# Terminal 2 — hotel
-cd src/hotel-researcher && agents-cli install && agents-cli run --agent adk_a2a --port 8002
-
-# Terminal 3 — orchestrator
-export FLIGHT_A2A_CARD_URL=http://127.0.0.1:8001/.well-known/agent.json
-export HOTEL_A2A_CARD_URL=http://127.0.0.1:8002/.well-known/agent.json
-cd src/trip-planner && agents-cli install && agents-cli run "Plan NYC to SFO."
+cd src/trip-planner
+agents-cli install
+agents-cli playground
 ```
 
-```mermaid
-sequenceDiagram
-  participant T3 as Terminal 3 trip-planner
-  participant T1 as Terminal 1 :8001
-  participant T2 as Terminal 2 :8002
+Use this when editing prompts or orchestrator logic—not when testing pure localhost A2A.
 
-  T3->>T1: fetch AgentCard (localhost)
-  T3->>T1: A2A message:send
-  T1-->>T3: flights
-  T3->>T2: A2A message:send
-  T2-->>T3: hotels
-```
+### Lab 4 — Offline eval (LLMOps baseline)
 
-## Eval
-
-Offline eval against the orchestrator (no live A2A required for baseline datasets):
+Eval measures agent quality **before** deploy and tracks regressions over time.
 
 ```bash
 cd src/trip-planner
 agents-cli eval run --region global
 ```
 
-Baselines: [`docs/notes/2026-06-21-eval-baseline.md`](../notes/2026-06-21-eval-baseline.md).
+Baselines and metrics: [`docs/notes/2026-06-21-eval-baseline.md`](../notes/2026-06-21-eval-baseline.md).
 
-## Next steps
+| LLMOps step      | Tool                  | When                                                                                                       |
+| ---------------- | --------------------- | ---------------------------------------------------------------------------------------------------------- |
+| Baseline eval    | `agents-cli eval run` | After code changes, before deploy                                                                          |
+| Trace inspection | Cloud Trace           | After deploy ([observability guide](https://google.github.io/agents-cli/guide/observability/cloud-trace/)) |
+| Logging          | Agent Runtime logs    | Production debugging                                                                                       |
 
-- Private deploy: [02-iam-deploy.md](02-iam-deploy.md)
-- Ingress paths: [03-auth-gateway.md](03-auth-gateway.md)
+Eval datasets run against the orchestrator logic; they do **not** replace an end-to-end A2A smoke test (Lab 2).
+
+### Dev modes (summary)
+
+```mermaid
+flowchart TD
+  Start["Choose dev mode"]
+  U["Lab 1: Unit tests<br/>pytest — no network"]
+  D["Lab 2: Deployed mesh<br/>agents-cli run --url"]
+  P["Lab 3: Playground<br/>local UI, remote A2A"]
+  E["Lab 4: Eval<br/>offline quality"]
+
+  Start --> U
+  Start --> D
+  Start --> P
+  Start --> E
+```
+
+> **Note:** Full localhost A2A (three terminals on `:8001`/`:8002`) requires temporarily pointing `app/cards/*.json` at local AgentCard URLs. Bundled cards target deployed engines by design—prefer **Lab 2** for realistic mesh testing.
+
+---
+
+## Verify
+
+Run this checklist before moving to deploy:
+
+```bash
+# 1. All unit tests green
+cd src/trip-planner && uv run pytest tests/unit/ -q
+
+# 2. Orchestrator has two A2A sub-agents
+uv run pytest tests/unit/test_a2a_mesh.py -q
+
+# 3. (Optional) Live mesh — expect flight + hotel sections in response
+cd src/trip-planner
+agents-cli run --url "<trip-planner-engine-url>" --mode adk \
+  "Plan NYC to SFO with flights and hotels."
+```
+
+| Check              | Pass criteria                                                                      |
+| ------------------ | ---------------------------------------------------------------------------------- |
+| Unit tests         | Exit code 0                                                                        |
+| `test_a2a_mesh.py` | Sub-agent names and bundled card IDs match deploy note                             |
+| Live run           | Response mentions both flights and hotels (not `a2a_required` or mock-only errors) |
+
+---
+
+## Troubleshooting
+
+| Symptom                                | Likely cause                          | Fix                                                                               |
+| -------------------------------------- | ------------------------------------- | --------------------------------------------------------------------------------- |
+| `a2a_required` or mock delegate errors | Old orchestrator code or stale deploy | Redeploy trip-planner; confirm `RemoteA2aAgent` in `agent.py`                     |
+| 401 on A2A delegation                  | Wrong runtime identity                | Orchestrator must use `trip-planner-sa`; see [02-iam-deploy.md](02-iam-deploy.md) |
+| Only flights, no hotels                | Model stopped early                   | Retry prompt; check orchestrator instruction in `agent.py`                        |
+| `agents-cli: command not found`        | CLI not installed                     | `uv tool install google-agents-cli`                                               |
+| Eval fails auth                        | Missing ADC                           | `gcloud auth application-default login`                                           |
+| Import errors in tests                 | Venv not synced                       | `agents-cli install` in that agent directory                                      |
+
+---
+
+## Further reading
+
+- [Agent CLI — Development](https://google.github.io/agents-cli/guide/development/)
+- [Agent CLI — Evaluation](https://google.github.io/agents-cli/guide/evaluation/)
+- [Agent CLI — Project structure](https://google.github.io/agents-cli/guide/project-structure/)
+- [ADK Remote A2aAgent](https://google.github.io/adk-docs/) (orchestration pattern)
+- A2A refactor notes: [`docs/notes/2026-06-21-a2a-mesh-refactor.md`](../notes/2026-06-21-a2a-mesh-refactor.md)
+
+---
+
+## Next step
+
+Deploy privately to Agent Runtime: **[02 — IAM deploy](02-iam-deploy.md)**.
