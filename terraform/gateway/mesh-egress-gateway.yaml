@@ -1,0 +1,7 @@
+name: mesh-egress-gateway
+protocols:
+  - MCP
+googleManaged:
+  governedAccessPath: AGENT_TO_ANYWHERE
+registries:
+  - //agentregistry.googleapis.com/projects/yexperiment/locations/asia-northeast1

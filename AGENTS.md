@@ -174,3 +174,21 @@ Some tools load mirrored skills under `.agents/skills/` instead of `.claude/`. O
 - **`.gemini/settings.json`** — Gemini CLI project context
 - **`.cursor/rules/`** — Optional Cursor rules (e.g. Always Apply); see [Cursor: Rules](https://cursor.com/docs/rules)
 - **[`.codex/config.toml`](.codex/config.toml)** — Optional Codex defaults (sandbox, approvals); links above under **OpenAI Codex**
+
+## Learned User Preferences
+
+- Delegate Google ADK / Agent Platform mesh work to **`agent-cli-master`** (Task tool); use **`verifier`** only for root template QA, not mesh deploy or governance.
+- Prefer **spawning subagents** for specialized or parallel work (gateway research, redeploy, governance scripts) instead of doing everything inline in one session.
+- Enterprise mesh delivery uses **`/loop` + `agent-cli-master`** until acceptance criteria in `docs/notes/ACCEPTANCE.md` are met.
+- **Commit (and push when requested) after each completed TODO** on enterprise mesh milestones, not batched at the end.
+
+## Learned Workspace Facts
+
+- Enterprise **trip-planner A2A mesh** lives under `src/trip-planner`, `src/flight-researcher`, and `src/hotel-researcher`, deployed to Agent Platform in **`yexperiment` / `asia-northeast1`**.
+- Orchestration uses ADK **`RemoteA2aAgent` sub-agents** with bundled AgentCards; **platform IAP, Agent Registry, and Agent Gateway** enforce governance (Python `mesh_auth` was removed in the A2A refactor).
+- Deploy order is **flight-researcher → hotel-researcher → trip-planner** with **`--agent-identity`**; set **`GOOGLE_CLOUD_LOCATION=global`** on all three agents for **`gemini-3.1-flash-lite`**.
+- Outbound A2A from trip-planner uses **`trip-planner-sa`** until **M3-2b** registry bindings exist (`AUTH_PROVIDER_BINDING` for OAuth auth provider).
+- Mesh governance scripts: `terraform/scripts/apply_mesh_governance.sh`, `resolve_iap_policies.sh`, `setup_agent_gateway.sh`, and readiness gate **`check_mesh_gateway_status.sh`**; gateways **`mesh-egress-gateway`** and **`mesh-ingress-gateway`** exist in `yexperiment`.
+- Registry **trip-planner→specialist bindings are skipped** until `AUTH_PROVIDER_BINDING` is set; IAP egress uses **`--resource-type=agent-registry`** with registry UIDs from `terraform/registry/mesh-agents.env`.
+- Agent **unit tests run per package**: `cd src/<agent> && uv run pytest tests/unit/` (combined root-level pytest fails on import paths).
+- Junior curriculum is layered in **`docs/guides/00-overview.md` through `05-gateway-policy-demo.md`**.

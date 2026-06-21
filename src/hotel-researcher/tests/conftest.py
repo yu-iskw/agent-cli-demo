@@ -13,4 +13,5 @@
 
 import os
 
+os.environ["GOOGLE_CLOUD_LOCATION"] = "global"
 os.environ.setdefault("INTEGRATION_TEST", "TRUE")

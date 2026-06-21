@@ -16,7 +16,7 @@
 import os
 
 import google.auth
-from google.adk.agents import Agent
+from google.adk.agents import Agent, SequentialAgent
 from google.adk.agents.remote_a2a_agent import RemoteA2aAgent
 from google.adk.apps import App
 from google.adk.models import Gemini
@@ -55,20 +55,27 @@ hotel_researcher = RemoteA2aAgent(
     use_legacy=False,
 )
 
-root_agent = Agent(
-    name="root_agent",
+trip_synthesizer = Agent(
+    name="trip_synthesizer",
     model=Gemini(
         model="gemini-3.1-flash-lite",
         retry_options=types.HttpRetryOptions(attempts=3),
     ),
-    description="Orchestrates trip planning by delegating to flight and hotel A2A specialists.",
+    description="Combines flight and hotel specialist outputs into one trip plan.",
     instruction=(
-        "You are the trip-planner orchestrator on Gemini Enterprise Agent Platform. "
-        "For every trip request: (1) transfer to flight_researcher for flights, "
-        "(2) transfer to hotel_researcher for hotels at the destination. "
-        "Combine both specialist responses into one concise trip plan."
+        "Read the conversation history containing flight_researcher and hotel_researcher "
+        "responses. Produce one concise trip plan with Flights and Hotels sections. "
+        "Do not invent options not present in specialist responses."
     ),
-    sub_agents=[flight_researcher, hotel_researcher],
+)
+
+root_agent = SequentialAgent(
+    name="root_agent",
+    description=(
+        "Orchestrates trip planning: flight A2A specialist, hotel A2A specialist, "
+        "then synthesis."
+    ),
+    sub_agents=[flight_researcher, hotel_researcher, trip_synthesizer],
 )
 
 app = App(
