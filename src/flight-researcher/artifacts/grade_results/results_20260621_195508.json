@@ -1,0 +1,300 @@
+{
+  "eval_case_results": [
+    {
+      "eval_case_index": 0,
+      "response_candidate_results": [
+        {
+          "response_index": 0,
+          "metric_results": {
+            "custom_response_quality": {
+              "metric_name": "custom_response_quality",
+              "score": 5.0,
+              "explanation": "The agent correctly identified the origin and destination from the user's prompt. Although the user only specified 'July', the agent chose a specific date (July 1st, 2026) which is a reasonable approach for a flight search. The agent successfully used the `search_flights` tool and accurately extracted all relevant information (airline, departure time, number of stops, and price) for both flight options. The final response is clear, well-structured, and easy to understand, providing all necessary details as requested by the prompt and available in the tool output.",
+              "rubric_verdicts": null,
+              "raw_output": null,
+              "error_message": null
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "summary_metrics": [
+    {
+      "metric_name": "custom_response_quality",
+      "num_cases_total": 1,
+      "num_cases_valid": 1,
+      "num_cases_error": 0,
+      "mean_score": 5.0,
+      "stdev_score": null,
+      "pass_rate": null
+    }
+  ],
+  "win_rates": null,
+  "evaluation_dataset": [
+    {
+      "bigquery_source": null,
+      "gcs_source": null,
+      "eval_cases": [
+        {
+          "prompt": {
+            "parts": [
+              {
+                "media_resolution": null,
+                "code_execution_result": null,
+                "executable_code": null,
+                "file_data": null,
+                "function_call": null,
+                "function_response": null,
+                "inline_data": null,
+                "text": "Find flights from NYC to San Francisco in July.",
+                "thought": null,
+                "thought_signature": null,
+                "video_metadata": null,
+                "tool_call": null,
+                "tool_response": null,
+                "part_metadata": null
+              }
+            ],
+            "role": "user"
+          },
+          "responses": [
+            {
+              "response": {
+                "parts": [
+                  {
+                    "media_resolution": null,
+                    "code_execution_result": null,
+                    "executable_code": null,
+                    "file_data": null,
+                    "function_call": null,
+                    "function_response": null,
+                    "inline_data": null,
+                    "text": "I found a couple of options for flights from NYC to San Francisco (SFO) on July 1st, 2026:\n\n*   **Mesh Air:** Departs at 8:00 AM, is a direct flight, and costs **$320**.\n*   **Demo Airways:** Departs at 2:30 PM, includes 1 stop, and costs **$275**.",
+                    "thought": null,
+                    "thought_signature": null,
+                    "video_metadata": null,
+                    "tool_call": null,
+                    "tool_response": null,
+                    "part_metadata": null
+                  }
+                ],
+                "role": "model"
+              }
+            }
+          ],
+          "reference": null,
+          "system_instruction": null,
+          "conversation_history": null,
+          "rubric_groups": null,
+          "eval_case_id": "flight_nyc_sfo",
+          "intermediate_events": null,
+          "agent_info": null,
+          "agent_data": {
+            "agents": {
+              "root_agent": {
+                "agent_id": "root_agent",
+                "agent_type": "LlmAgent",
+                "description": "Searches flights between cities for the trip-planner mesh.",
+                "instruction": "You are the flight-researcher specialist. Use search_flights for routes. If state mesh_auth_denied is set, respond with that message only. Summarize options clearly with price and departure time.",
+                "tools": [
+                  {
+                    "retrieval": null,
+                    "computer_use": null,
+                    "file_search": null,
+                    "google_search": null,
+                    "google_maps": null,
+                    "code_execution": null,
+                    "enterprise_web_search": null,
+                    "function_declarations": [
+                      {
+                        "description": "Search available flights between two cities.\n\nArgs:\n    origin: Departure city or airport code (e.g. NYC).\n    destination: Arrival city or airport code (e.g. SFO).\n\nReturns:\n    Flight options with airline, times, and price.",
+                        "name": "search_flights",
+                        "parameters": null,
+                        "parameters_json_schema": {
+                          "properties": {
+                            "origin": {
+                              "title": "Origin",
+                              "type": "string"
+                            },
+                            "destination": {
+                              "title": "Destination",
+                              "type": "string"
+                            }
+                          },
+                          "required": ["origin", "destination"],
+                          "title": "search_flightsParams",
+                          "type": "object"
+                        },
+                        "response": null,
+                        "response_json_schema": {
+                          "additionalProperties": true,
+                          "type": "object"
+                        },
+                        "behavior": null
+                      }
+                    ],
+                    "google_search_retrieval": null,
+                    "parallel_ai_search": null,
+                    "url_context": null,
+                    "mcp_servers": null
+                  }
+                ],
+                "sub_agents": []
+              }
+            },
+            "turns": [
+              {
+                "turn_index": 0,
+                "turn_id": "turn_0",
+                "events": [
+                  {
+                    "author": "root_agent",
+                    "content": {
+                      "parts": [
+                        {
+                          "media_resolution": null,
+                          "code_execution_result": null,
+                          "executable_code": null,
+                          "file_data": null,
+                          "function_call": {
+                            "id": "adk-6a64a089-5e26-425d-9bf9-a7270837775d",
+                            "args": {
+                              "origin": "NYC",
+                              "destination": "SFO"
+                            },
+                            "name": "search_flights",
+                            "partial_args": null,
+                            "will_continue": null
+                          },
+                          "function_response": null,
+                          "inline_data": null,
+                          "text": null,
+                          "thought": null,
+                          "thought_signature": null,
+                          "video_metadata": null,
+                          "tool_call": null,
+                          "tool_response": null,
+                          "part_metadata": null
+                        }
+                      ],
+                      "role": "model"
+                    },
+                    "event_time": null,
+                    "state_delta": null,
+                    "active_tools": null
+                  },
+                  {
+                    "author": "root_agent",
+                    "content": {
+                      "parts": [
+                        {
+                          "media_resolution": null,
+                          "code_execution_result": null,
+                          "executable_code": null,
+                          "file_data": null,
+                          "function_call": null,
+                          "function_response": {
+                            "will_continue": null,
+                            "scheduling": null,
+                            "parts": null,
+                            "id": "adk-6a64a089-5e26-425d-9bf9-a7270837775d",
+                            "name": "search_flights",
+                            "response": {
+                              "status": "ok",
+                              "origin": "NYC",
+                              "destination": "SFO",
+                              "flights": [
+                                {
+                                  "airline": "Mesh Air",
+                                  "origin": "NYC",
+                                  "destination": "SFO",
+                                  "departure": "2026-07-01T08:00:00",
+                                  "price_usd": 320,
+                                  "stops": 0
+                                },
+                                {
+                                  "airline": "Demo Airways",
+                                  "origin": "NYC",
+                                  "destination": "SFO",
+                                  "departure": "2026-07-01T14:30:00",
+                                  "price_usd": 275,
+                                  "stops": 1
+                                }
+                              ]
+                            }
+                          },
+                          "inline_data": null,
+                          "text": null,
+                          "thought": null,
+                          "thought_signature": null,
+                          "video_metadata": null,
+                          "tool_call": null,
+                          "tool_response": null,
+                          "part_metadata": null
+                        }
+                      ],
+                      "role": "user"
+                    },
+                    "event_time": null,
+                    "state_delta": null,
+                    "active_tools": null
+                  },
+                  {
+                    "author": "root_agent",
+                    "content": {
+                      "parts": [
+                        {
+                          "media_resolution": null,
+                          "code_execution_result": null,
+                          "executable_code": null,
+                          "file_data": null,
+                          "function_call": null,
+                          "function_response": null,
+                          "inline_data": null,
+                          "text": "I found a couple of options for flights from NYC to San Francisco (SFO) on July 1st, 2026:\n\n*   **Mesh Air:** Departs at 8:00 AM, is a direct flight, and costs **$320**.\n*   **Demo Airways:** Departs at 2:30 PM, includes 1 stop, and costs **$275**.",
+                          "thought": null,
+                          "thought_signature": null,
+                          "video_metadata": null,
+                          "tool_call": null,
+                          "tool_response": null,
+                          "part_metadata": null
+                        }
+                      ],
+                      "role": "model"
+                    },
+                    "event_time": null,
+                    "state_delta": null,
+                    "active_tools": null
+                  }
+                ]
+              }
+            ]
+          },
+          "user_scenario": null
+        }
+      ],
+      "eval_dataset_df": null,
+      "candidate_name": null
+    }
+  ],
+  "metadata": {
+    "candidate_names": ["candidate_1"],
+    "dataset_name": null,
+    "dataset_id": null,
+    "creation_timestamp": "2026-06-21T10:55:08.609229Z",
+    "dataset": [
+      {
+        "prompt_display_text": "Find flights from NYC to San Francisco in July.",
+        "prompt_raw_json": "{\n  \"parts\": [\n    {\n      \"text\": \"Find flights from NYC to San Francisco in July.\"\n    }\n  ],\n  \"role\": \"user\"\n}",
+        "reference": "",
+        "reference_raw_json": "",
+        "response_display_text": "I found a couple of options for flights from NYC to San Francisco (SFO) on July 1st, 2026:\n\n*   **Mesh Air:** Departs at 8:00 AM, is a direct flight, and costs **$320**.\n*   **Demo Airways:** Departs at 2:30 PM, includes 1 stop, and costs **$275**.",
+        "response_raw_json": "{\n  \"parts\": [\n    {\n      \"text\": \"I found a couple of options for flights from NYC to San Francisco (SFO) on July 1st, 2026:\\n\\n*   **Mesh Air:** Departs at 8:00 AM, is a direct flight, and costs **$320**.\\n*   **Demo Airways:** Departs at 2:30 PM, includes 1 stop, and costs **$275**.\"\n    }\n  ],\n  \"role\": \"model\"\n}",
+        "intermediate_events": null,
+        "agent_data": "{\"agents\": {\"root_agent\": {\"agent_id\": \"root_agent\", \"agent_type\": \"LlmAgent\", \"description\": \"Searches flights between cities for the trip-planner mesh.\", \"instruction\": \"You are the flight-researcher specialist. Use search_flights for routes. If state mesh_auth_denied is set, respond with that message only. Summarize options clearly with price and departure time.\", \"tools\": [{\"function_declarations\": [{\"description\": \"Search available flights between two cities.\\n\\nArgs:\\n    origin: Departure city or airport code (e.g. NYC).\\n    destination: Arrival city or airport code (e.g. SFO).\\n\\nReturns:\\n    Flight options with airline, times, and price.\", \"name\": \"search_flights\", \"parameters_json_schema\": {\"properties\": {\"origin\": {\"title\": \"Origin\", \"type\": \"string\"}, \"destination\": {\"title\": \"Destination\", \"type\": \"string\"}}, \"required\": [\"origin\", \"destination\"], \"title\": \"search_flightsParams\", \"type\": \"object\"}, \"response_json_schema\": {\"additionalProperties\": true, \"type\": \"object\"}}]}], \"sub_agents\": []}}, \"turns\": [{\"turn_index\": 0, \"turn_id\": \"turn_0\", \"events\": [{\"author\": \"root_agent\", \"content\": {\"parts\": [{\"function_call\": {\"id\": \"adk-6a64a089-5e26-425d-9bf9-a7270837775d\", \"args\": {\"origin\": \"NYC\", \"destination\": \"SFO\"}, \"name\": \"search_flights\"}}], \"role\": \"model\"}}, {\"author\": \"root_agent\", \"content\": {\"parts\": [{\"function_response\": {\"id\": \"adk-6a64a089-5e26-425d-9bf9-a7270837775d\", \"name\": \"search_flights\", \"response\": {\"status\": \"ok\", \"origin\": \"NYC\", \"destination\": \"SFO\", \"flights\": [{\"airline\": \"Mesh Air\", \"origin\": \"NYC\", \"destination\": \"SFO\", \"departure\": \"2026-07-01T08:00:00\", \"price_usd\": 320, \"stops\": 0}, {\"airline\": \"Demo Airways\", \"origin\": \"NYC\", \"destination\": \"SFO\", \"departure\": \"2026-07-01T14:30:00\", \"price_usd\": 275, \"stops\": 1}]}}}], \"role\": \"user\"}}, {\"author\": \"root_agent\", \"content\": {\"parts\": [{\"text\": \"I found a couple of options for flights from NYC to San Francisco (SFO) on July 1st, 2026:\\n\\n*   **Mesh Air:** Departs at 8:00 AM, is a direct flight, and costs **$320**.\\n*   **Demo Airways:** Departs at 2:30 PM, includes 1 stop, and costs **$275**.\"}], \"role\": \"model\"}}]}]}"
+      }
+    ]
+  },
+  "agent_info": null
+}

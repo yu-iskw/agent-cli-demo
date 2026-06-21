@@ -1,0 +1,14 @@
+name: hotel-researcher
+acli_version: 0.5.0
+agent_directory: app
+region: asia-northeast1
+base_template: adk_a2a
+generated_at: "2026-06-21T10:47:11.281472+00:00"
+language: python
+create_params:
+  deployment_target: agent_runtime
+  cicd_runner: skip
+  include_data_ingestion: false
+  is_a2a: true
+  datastore: none
+  agent_guidance_filename: AGENTS.md

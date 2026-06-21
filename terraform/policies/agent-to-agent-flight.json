@@ -1,0 +1,15 @@
+{
+  "policy": {
+    "bindings": [
+      {
+        "role": "roles/iap.egressor",
+        "members": ["TRIP_PLANNER_AGENT_PRINCIPAL"],
+        "condition": {
+          "title": "AllowTripPlannerToFlightWithPermittedUsers",
+          "description": "End user must be in mesh-full-user or mesh-flight-user group.",
+          "expression": "api.getAttribute('authorization.permissions', []).exists(p, p in ['mesh-full-user', 'mesh-flight-user'])"
+        }
+      }
+    ]
+  }
+}

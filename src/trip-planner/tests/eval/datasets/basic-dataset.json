@@ -1,0 +1,26 @@
+{
+  "eval_cases": [
+    {
+      "eval_case_id": "trip_nyc_sfo",
+      "prompt": {
+        "role": "user",
+        "parts": [
+          {
+            "text": "Plan a trip from NYC to San Francisco. Include flights and hotels."
+          }
+        ]
+      }
+    },
+    {
+      "eval_case_id": "trip_flight_only_persona",
+      "prompt": {
+        "role": "user",
+        "parts": [
+          {
+            "text": "Plan NYC to San Francisco with flights and hotels. User persona is mesh-flight-user."
+          }
+        ]
+      }
+    }
+  ]
+}

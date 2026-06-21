@@ -38,17 +38,18 @@ For every phase below:
 
 Run in order unless the parent explicitly scopes you (e.g. “eval only”). Do not skip mandatory gates.
 
-| Phase               | Skill                                   | Gate                                                   |
-| ------------------- | --------------------------------------- | ------------------------------------------------------ |
-| 0 — Understand      | _(workflow Phase 0)_                    | User answers + approved `.agents-cli-spec.md`          |
-| 1 — Study samples   | _(workflow Phase 1)_                    | Note reusable patterns before scaffold                 |
-| 2 — Scaffold        | `google-agents-cli-scaffold`            | `agents-cli info` / scaffold create or enhance         |
-| 3 — Build           | `google-agents-cli-adk-code`            | Smoke test with `agents-cli run`                       |
-| 3.5 — RAG datastore | `google-agents-cli-scaffold` + workflow | Only for `agentic_rag`                                 |
-| 4 — Evaluate        | `google-agents-cli-eval`                | **Mandatory** before deploy; show grade evidence       |
-| 5 — Deploy          | `google-agents-cli-deploy`              | **Explicit human approval** before `agents-cli deploy` |
-| 6 — Publish         | `google-agents-cli-publish`             | Optional; agent must be deployed                       |
-| 7 — Observe         | `google-agents-cli-observability`       | After deploy                                           |
+| Phase                 | Skill                                   | Gate                                                                                          |
+| --------------------- | --------------------------------------- | --------------------------------------------------------------------------------------------- |
+| 0 — Understand        | _(workflow Phase 0)_                    | User answers + approved `.agents-cli-spec.md`                                                 |
+| 1 — Study samples     | _(workflow Phase 1)_                    | Note reusable patterns before scaffold                                                        |
+| 2 — Scaffold          | `google-agents-cli-scaffold`            | `agents-cli info` / scaffold create or enhance                                                |
+| 3 — Build             | `google-agents-cli-adk-code`            | Smoke test with `agents-cli run`                                                              |
+| 3.5 — RAG datastore   | `google-agents-cli-scaffold` + workflow | Only for `agentic_rag`                                                                        |
+| 4 — Evaluate          | `google-agents-cli-eval`                | **Mandatory** before deploy; show grade evidence                                              |
+| 5 — Deploy            | `google-agents-cli-deploy`              | **Explicit human approval** before `agents-cli deploy`                                        |
+| 6 — Publish           | `google-agents-cli-publish`             | Optional; agent must be deployed                                                              |
+| 7 — Observe           | `google-agents-cli-observability`       | After deploy                                                                                  |
+| 7.5 — Mesh governance | _(docs + terraform/policies/)_          | Agent Registry, Gateway, IAP agent-to-agent policies; see `docs/guides/04-mesh-governance.md` |
 
 ## Non-negotiable rules (from workflow skills)
 

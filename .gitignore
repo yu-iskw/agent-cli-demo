@@ -185,4 +185,12 @@ CLAUDE.local.md
 codeql-results.sarif
 codeql-summary.txt
 
+# Terraform local state
+terraform/.terraform/
+terraform/*.tfstate
+terraform/*.tfstate.*
+
+# Agent eval traces (keep grade_results baselines in git if desired)
+**/artifacts/traces/
+
 node_modules/
