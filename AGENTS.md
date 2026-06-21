@@ -104,33 +104,51 @@ make clean        # Clean build artifacts
 ## Parallel or multi-step work (Claude Code)
 
 - This repo does **not** ship a built-in parallel orchestration subagent. For concurrent work, use multiple Task invocations, your editor’s multi-agent features, or your own scripts.
-- After substantial or overlapping edits, use the **`verifier`** subagent ([.claude/agents/verifier.md](.claude/agents/verifier.md)) to run **build → lint → test → dependency scan → CodeQL** by delegating each phase to `build-and-fix`, `lint-and-fix`, `test-and-fix`, `security-scan`, and `codeql-fix`.
+- Pick the orchestrator by scope — do not mix template QA with ADK lifecycle work:
+
+| Subagent           | Use when                                                                  |
+| ------------------ | ------------------------------------------------------------------------- |
+| `verifier`         | Template repo QA: build, lint, test, dependency CVE scan, CodeQL          |
+| `agent-cli-master` | ADK agent lifecycle: scaffold → build → eval → deploy → publish → observe |
+
+- After substantial or overlapping edits to **this template**, use **`verifier`** ([.claude/agents/verifier.md](.claude/agents/verifier.md)) — it delegates to `build-and-fix`, `lint-and-fix`, `test-and-fix`, `security-scan`, and `codeql-fix`.
+- For **Google ADK / agents-cli** work, use **`agent-cli-master`** ([.claude/agents/agent-cli-master.md](.claude/agents/agent-cli-master.md)). It runs Phases 0–7 via preloaded `google-agents-cli-*` skills. Requires `agents-cli` on `PATH` (`uv tool install google-agents-cli`).
 
 ## Claude Code subagents
 
 Invoked from Claude Code (Task tool or slash flows). Definitions: [`.claude/agents/*.md`](.claude/agents/)
 
 - **`verifier`** — Five-phase verification via preload skills; see [.claude/agents/verifier.md](.claude/agents/verifier.md).
+- **`agent-cli-master`** — ADK lifecycle orchestrator (Phases 0–7) via preloaded `google-agents-cli-*` skills; see [.claude/agents/agent-cli-master.md](.claude/agents/agent-cli-master.md).
 
 ## Claude Code skills
 
 Slash-invoked skills live under [`.claude/skills/<name>/SKILL.md`](.claude/skills/). Use a skill when it matches the task; each `SKILL.md` lists prerequisites (some require a CLI on `PATH`). Skills cite this file and `Makefile` targets rather than linking peer-to-peer to other `SKILL.md` files.
 
-| Skill                       | When to use                                                                 |
-| --------------------------- | --------------------------------------------------------------------------- |
-| `build-and-fix`             | Build or packaging failures                                                 |
-| `check-directory-structure` | After bulk edits; audit layout; fix flat/misplaced files                    |
-| `codeql-fix`                | Local CodeQL (`make codeql`); requires CodeQL CLI                           |
-| `lint-and-fix`              | Trunk / linter failures                                                     |
-| `test-and-fix`              | Failing tests                                                               |
-| `setup-dev-env`             | First-time or broken environment                                            |
-| `python-upgrade`            | Dependency upgrades with uv                                                 |
-| `security-scan`             | Trivy / OSV / Grype (`make scan-vulnerabilities`)                           |
-| `initialize-project`        | Renaming the template and bootstrapping                                     |
-| `manage-adr`                | ADRs in `docs/adr` (requires `adr` CLI)                                     |
-| `postmortem`                | Substantive session end; incidents; skip trivial chore-only sessions        |
-| `problem-solving`           | Single-pass XY-aware analysis and scored comparison (default 5 options)     |
-| `deep-problem-solving`      | Same style of report after **ten** multiple-choice questions (one per turn) |
+| Skill                             | When to use                                                                  |
+| --------------------------------- | ---------------------------------------------------------------------------- |
+| `build-and-fix`                   | Build or packaging failures                                                  |
+| `check-directory-structure`       | After bulk edits; audit layout; fix flat/misplaced files                     |
+| `codeql-fix`                      | Local CodeQL (`make codeql`); requires CodeQL CLI                            |
+| `lint-and-fix`                    | Trunk / linter failures                                                      |
+| `test-and-fix`                    | Failing tests                                                                |
+| `setup-dev-env`                   | First-time or broken environment                                             |
+| `python-upgrade`                  | Dependency upgrades with uv                                                  |
+| `security-scan`                   | Trivy / OSV / Grype (`make scan-vulnerabilities`)                            |
+| `initialize-project`              | Renaming the template and bootstrapping                                      |
+| `manage-adr`                      | ADRs in `docs/adr` (requires `adr` CLI)                                      |
+| `postmortem`                      | Substantive session end; incidents; skip trivial chore-only sessions         |
+| `problem-solving`                 | Single-pass XY-aware analysis and scored comparison (default 5 options)      |
+| `deep-problem-solving`            | Same style of report after **ten** multiple-choice questions (one per turn)  |
+| `google-agents-cli-workflow`      | ADK lifecycle entry point, Phase 0 spec, coding rules; requires `agents-cli` |
+| `google-agents-cli-scaffold`      | `scaffold create` / `enhance` / `upgrade`; architecture and template flags   |
+| `google-agents-cli-adk-code`      | Agent code: tools, callbacks, state, ADK Python API patterns                 |
+| `google-agents-cli-eval`          | Eval datasets, metrics, eval-fix loop (**mandatory before deploy**)          |
+| `google-agents-cli-deploy`        | Deploy targets, CI/CD, Terraform, production troubleshooting                 |
+| `google-agents-cli-publish`       | Register with Gemini Enterprise (optional, post-deploy)                      |
+| `google-agents-cli-observability` | Traces, logging, BigQuery analytics (post-deploy)                            |
+
+**Google ADK skills** live under [`.claude/skills/agent-cli/`](.claude/skills/agent-cli/) (Claude Code) and [`.agents/skills/agent-cli/`](.agents/skills/agent-cli/) (Cursor and other tools). In Claude Code, prefer delegating full lifecycle work to **`agent-cli-master`** rather than loading skills ad hoc.
 
 Some tools load mirrored skills under `.agents/skills/` instead of `.claude/`. Other repos may add `manage-changelog` when Changie is configured (see **Git workflow**).
 
@@ -150,6 +168,8 @@ Some tools load mirrored skills under `.agents/skills/` instead of `.claude/`. O
 
 - **This file** — Stack, `make` targets, style, testing, security, git, ADR pointers, Claude subagent/skill tables
 - **[CLAUDE.md](CLAUDE.md)** + **[`.claude/`](.claude/)** — Claude Code entrypoint and automation layout (see CLAUDE.md for directory breakdown and self-improvement rules)
+- **`.claude/skills/agent-cli/`** — Google Agents CLI skills (`google-agents-cli-*`); mirrored under **`.agents/skills/agent-cli/`**
+- **`.claude/agents/agent-cli-master.md`** — Claude Code subagent orchestrating those skills
 - **`.agents/skills/`** — Skills for tools that do not read `.claude/` (e.g. `postmortem`); may mirror `.claude/skills/`
 - **`.gemini/settings.json`** — Gemini CLI project context
 - **`.cursor/rules/`** — Optional Cursor rules (e.g. Always Apply); see [Cursor: Rules](https://cursor.com/docs/rules)

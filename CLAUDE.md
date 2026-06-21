@@ -16,6 +16,12 @@ The `@AGENTS.md` import inlines that file at session start (Claude Code reads th
 
 Authoritative list of subagents and skills is in [AGENTS.md](AGENTS.md); definitions stay in the paths above.
 
+## ADK / agents-cli (Claude Code)
+
+Invoke **`agent-cli-master`** via the Task tool for ADK work (scaffold, build, eval, deploy, publish, observe). It preloads the seven `google-agents-cli-*` skills listed in [AGENTS.md](AGENTS.md) and returns a phase report to the parent session.
+
+Deploy and infra commands may need sandbox/network permissions beyond the default [`.claude/settings.json`](.claude/settings.json) allowlist.
+
 ## Self-improvement (Claude Code)
 
 - For rules that **every** coding agent should follow, edit [AGENTS.md](AGENTS.md), not this file.
