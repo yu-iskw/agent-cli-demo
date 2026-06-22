@@ -19,14 +19,20 @@ class GoogleCloudAuth(httpx.Auth):
     """Auto-refreshing Google Cloud authentication for httpx AsyncClient."""
 
     def __init__(self) -> None:
-        self.credentials, _ = google.auth.default(
-            scopes=["https://www.googleapis.com/auth/cloud-platform"]
-        )
+        self._credentials: google.auth.credentials.Credentials | None = None
+
+    def _credentials_or_raise(self) -> google.auth.credentials.Credentials:
+        if self._credentials is None:
+            self._credentials, _ = google.auth.default(
+                scopes=["https://www.googleapis.com/auth/cloud-platform"]
+            )
+        return self._credentials
 
     def auth_flow(self, request: httpx.Request):
-        if not self.credentials.valid:
-            self.credentials.refresh(google.auth.transport.requests.Request())
-        request.headers["Authorization"] = f"Bearer {self.credentials.token}"
+        credentials = self._credentials_or_raise()
+        if not credentials.valid:
+            credentials.refresh(google.auth.transport.requests.Request())
+        request.headers["Authorization"] = f"Bearer {credentials.token}"
         yield request
 
 

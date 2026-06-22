@@ -23,11 +23,20 @@ from google.genai import types
 
 from app.tools import search_flights
 
-_, project_id = google.auth.default()
-if project_id is not None:
-    os.environ["GOOGLE_CLOUD_PROJECT"] = project_id
-os.environ["GOOGLE_CLOUD_LOCATION"] = os.environ.get("GOOGLE_CLOUD_LOCATION", "global")
-os.environ["GOOGLE_GENAI_USE_VERTEXAI"] = "True"
+
+def _configure_vertex_env() -> None:
+    if "GOOGLE_CLOUD_PROJECT" not in os.environ:
+        try:
+            _, project_id = google.auth.default()
+            if project_id:
+                os.environ["GOOGLE_CLOUD_PROJECT"] = project_id
+        except google.auth.exceptions.DefaultCredentialsError:
+            pass
+    os.environ.setdefault("GOOGLE_CLOUD_LOCATION", "global")
+    os.environ.setdefault("GOOGLE_GENAI_USE_VERTEXAI", "True")
+
+
+_configure_vertex_env()
 
 root_agent = Agent(
     name="root_agent",
