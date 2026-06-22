@@ -13,5 +13,16 @@
 
 import os
 
+import google.auth
+import google.auth.exceptions
+
 os.environ["GOOGLE_CLOUD_LOCATION"] = "global"
+os.environ.setdefault("GOOGLE_CLOUD_PROJECT", "test-project")
 os.environ.setdefault("INTEGRATION_TEST", "TRUE")
+
+collect_ignore: list[str] = []
+
+try:
+    google.auth.default()
+except google.auth.exceptions.DefaultCredentialsError:
+    collect_ignore.append("integration")
