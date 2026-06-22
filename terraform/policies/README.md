@@ -22,7 +22,7 @@ Trip-planner may call flight-researcher when the end user is in an allowed group
 
 ```bash
 gcloud beta iap web set-iam-policy terraform/policies/agent-to-agent-flight.resolved.json \
-  --project=yexperiment \
+  --project=<your-gcp-project> \
   --region=asia-northeast1 \
   --resource-type=agent-registry \
   --agent=FLIGHT_REGISTRY_AGENT_ID
@@ -36,7 +36,7 @@ Same pattern for hotel-researcher:
 
 ```bash
 gcloud beta iap web set-iam-policy terraform/policies/agent-to-agent-hotel.resolved.json \
-  --project=yexperiment \
+  --project=<your-gcp-project> \
   --region=asia-northeast1 \
   --resource-type=agent-registry \
   --agent=HOTEL_REGISTRY_AGENT_ID

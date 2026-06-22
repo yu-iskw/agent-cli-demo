@@ -19,7 +19,7 @@ fi
 
 TRIP_PLANNER_PRINCIPAL="${TRIP_PLANNER_PRINCIPAL:-${TRIP_PLANNER_AGENT_PRINCIPAL-}}"
 if [[ -z ${TRIP_PLANNER_PRINCIPAL} ]]; then
-	echo "error: set TRIP_PLANNER_PRINCIPAL or TRIP_PLANNER_AGENT_PRINCIPAL" >&2
+	echo "error: missing TRIP_PLANNER_PRINCIPAL; run ./terraform/scripts/discover_mesh.sh" >&2
 	exit 1
 fi
 

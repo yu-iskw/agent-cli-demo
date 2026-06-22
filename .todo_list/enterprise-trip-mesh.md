@@ -1,6 +1,6 @@
 # Enterprise Trip-Planner Mesh — TODO
 
-Project: `yexperiment` | Region: `asia-northeast1` | Private only
+Project: `<your-gcp-project>` | Region: `asia-northeast1` | Private only
 
 ## Milestone 1 — Local mesh + offline eval
 
@@ -22,7 +22,7 @@ Project: `yexperiment` | Region: `asia-northeast1` | Private only
 
 ## Milestone 3 — Gateway + mesh governance
 
-- [x] M3-1: Register all agents in Agent Registry (auto on deploy; discovery in `docs/notes/2026-06-21-m3-discovery.md`)
+- [x] M3-1: Register all agents in Agent Registry (auto on deploy; discovery in `docs/archive/yexperiment-poc/2026-06-21-m3-discovery.md`)
 - [x] M3-2a: IAM ingress on trip-planner (ADC user; curl smoke test in `docs/guides/03-auth-gateway.md`)
 - [ ] M3-2b: Agent Gateway + OAuth ingress (requires OAuth client + real Google Groups + `AUTH_PROVIDER_BINDING`)
 - [x] M3-3: Agent-to-agent IAP egress policies applied (flight/hotel; `--resource-type=agent-registry`, registry UIDs)

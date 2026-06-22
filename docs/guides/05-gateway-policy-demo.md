@@ -44,7 +44,7 @@ flowchart TB
     IGW --> Authz
   end
 
-  subgraph Registry["Agent Registry — yexperiment"]
+  subgraph Registry["Agent Registry — <your-gcp-project>"]
     TP_UID["trip-planner registry UID"]
     FR_UID["flight-researcher UID"]
     HR_UID["hotel-researcher UID"]
@@ -52,7 +52,7 @@ flowchart TB
   end
 
   subgraph Runtime["Reasoning Engines"]
-    TP["trip-planner<br/>2464937943706370048<br/>trip-planner-sa outbound"]
+    TP["trip-planner<br/>${TRIP_PLANNER_ENGINE_ID}<br/>trip-planner-sa outbound"]
     FR["flight-researcher"]
     HR["hotel-researcher"]
   end
@@ -87,7 +87,7 @@ flowchart TB
 
 ### Egress vs ingress gateways
 
-**In plain English:** **Ingress** (`mesh-ingress-gateway`) is the front door for browser users—`CLIENT_TO_AGENT`. **Egress** (`mesh-egress-gateway`) governs agent-initiated calls—`AGENT_TO_ANYWHERE`—from trip-planner to specialists via the registry. Both already exist in `yexperiment` / `asia-northeast1`.
+**In plain English:** **Ingress** (`mesh-ingress-gateway`) is the front door for browser users—`CLIENT_TO_AGENT`. **Egress** (`mesh-egress-gateway`) governs agent-initiated calls—`AGENT_TO_ANYWHERE`—from trip-planner to specialists via the registry. Both already exist in `<your-gcp-project>` / `asia-northeast1`.
 
 | Gateway                              | Path             | Purpose                                       |
 | ------------------------------------ | ---------------- | --------------------------------------------- |
@@ -196,7 +196,7 @@ flowchart TB
   end
 
   subgraph Orchestrator["trip-planner"]
-    TP["engine 2464937943706370048"]
+    TP["engine ${TRIP_PLANNER_ENGINE_ID}"]
   end
 
   subgraph Specialists["IAP egress"]
@@ -260,14 +260,14 @@ flowchart TD
 
 ## Prerequisites
 
-| Requirement    | Notes                                                                      |
-| -------------- | -------------------------------------------------------------------------- |
-| M3-2a complete | Agents deployed; registry services exist; IAM ingress applied              |
-| M3-2b partial  | Gateways + `mesh-iap-authz-ext` exist; OAuth connector pending             |
-| Google Groups  | `mesh-full-user`, `mesh-flight-user`, `mesh-hotel-user`, `mesh-deny-user`  |
-| OAuth client   | Google Auth Platform project `yexperiment`; redirect URI from setup script |
-| ADC            | `gcloud auth application-default login`                                    |
-| Live engine    | trip-planner `2464937943706370048`; update `mesh-agents.env` if recreated  |
+| Requirement    | Notes                                                                             |
+| -------------- | --------------------------------------------------------------------------------- |
+| M3-2a complete | Agents deployed; registry services exist; IAM ingress applied                     |
+| M3-2b partial  | Gateways + `mesh-iap-authz-ext` exist; OAuth connector pending                    |
+| Google Groups  | `mesh-full-user`, `mesh-flight-user`, `mesh-hotel-user`, `mesh-deny-user`         |
+| OAuth client   | Google Auth Platform project `<your-gcp-project>`; redirect URI from setup script |
+| ADC            | `gcloud auth application-default login`                                           |
+| Live engine    | trip-planner `${TRIP_PLANNER_ENGINE_ID}`; update `mesh-agents.env` if recreated   |
 
 ---
 
@@ -323,11 +323,11 @@ Creates or skips:
 
 **Micro-tutorial:** This is the first action that touches secrets. Do not commit client IDs or secrets.
 
-1. Create an OAuth client in Google Auth Platform for project `yexperiment`.
+1. Create an OAuth client in Google Auth Platform for project `<your-gcp-project>`.
 2. Add the redirect URI printed by the script:
 
    ```text
-   https://iamconnectorcredentials.googleapis.com/v1/projects/yexperiment/locations/asia-northeast1/connectors/mesh-oauth-3lo/oauthcallback
+   https://iamconnectorcredentials.googleapis.com/v1/projects/<your-gcp-project>/locations/asia-northeast1/connectors/mesh-oauth-3lo/oauthcallback
    ```
 
 3. Run:
@@ -341,7 +341,7 @@ export OAUTH_CLIENT_SECRET="your-client-secret"
 The script exports:
 
 ```bash
-export AUTH_PROVIDER_BINDING="projects/yexperiment/locations/asia-northeast1/connectors/mesh-oauth-3lo"
+export AUTH_PROVIDER_BINDING="projects/<your-gcp-project>/locations/asia-northeast1/connectors/mesh-oauth-3lo"
 ```
 
 Grant `roles/iamconnectors.user` to trip-planner agent identity when redeploying with `--agent-identity`.
@@ -350,7 +350,7 @@ Grant `roles/iamconnectors.user` to trip-planner agent identity when redeploying
 
 ```bash
 export MESH_IAM_TEST_MEMBERS="user:you@example.com"
-export AUTH_PROVIDER_BINDING="projects/yexperiment/locations/asia-northeast1/connectors/mesh-oauth-3lo"
+export AUTH_PROVIDER_BINDING="projects/<your-gcp-project>/locations/asia-northeast1/connectors/mesh-oauth-3lo"
 ./terraform/scripts/apply_mesh_governance.sh
 ```
 
@@ -382,7 +382,7 @@ After gateways and connector exist, redeploy trip-planner with `--agent-identity
 | `mesh-hotel-user`  | Hotels OK; flight denied or AUTH_ERROR; logs show flight deny |
 | `mesh-deny-user`   | Blocked at ingress once OAuth path is live                    |
 
-Record results in [`docs/notes/2026-06-21-m3-platform-tests.md`](../notes/2026-06-21-m3-platform-tests.md).
+Record results in [`docs/archive/yexperiment-poc/2026-06-21-m3-platform-tests.md`](../archive/yexperiment-poc/2026-06-21-m3-platform-tests.md).
 
 ### Step 7 — Switch to enforce
 

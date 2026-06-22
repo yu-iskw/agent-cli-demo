@@ -184,11 +184,11 @@ Some tools load mirrored skills under `.agents/skills/` instead of `.claude/`. O
 
 ## Learned Workspace Facts
 
-- Enterprise **trip-planner A2A mesh** lives under `src/trip-planner`, `src/flight-researcher`, and `src/hotel-researcher`, deployed to Agent Platform in **`yexperiment` / `asia-northeast1`**.
+- Enterprise **trip-planner A2A mesh** lives under `src/trip-planner`, `src/flight-researcher`, and `src/hotel-researcher`. Deploy to Agent Platform in your GCP project (see `terraform/terraform.tfvars.example` and `discover_mesh.sh`).
 - Orchestration uses ADK **`RemoteA2aAgent` sub-agents** with bundled AgentCards; **platform IAP, Agent Registry, and Agent Gateway** enforce governance (Python `mesh_auth` was removed in the A2A refactor).
-- Deploy order is **flight-researcher → hotel-researcher → trip-planner** with **`--agent-identity`**; set **`GOOGLE_CLOUD_LOCATION=global`** on all three agents for **`gemini-3.1-flash-lite`**.
-- Outbound A2A from trip-planner uses **`trip-planner-sa`** until **M3-2b** registry bindings exist (`AUTH_PROVIDER_BINDING` for OAuth auth provider).
-- Mesh governance scripts: `terraform/scripts/apply_mesh_governance.sh`, `resolve_iap_policies.sh`, `setup_agent_gateway.sh`, and readiness gate **`check_mesh_gateway_status.sh`**; gateways **`mesh-egress-gateway`** and **`mesh-ingress-gateway`** exist in `yexperiment`.
+- Deploy order is **flight-researcher → hotel-researcher → trip-planner** with **`--agent-identity`** on specialists; set **`GOOGLE_CLOUD_LOCATION=global`** on all three agents for **`gemini-3.1-flash-lite`**.
+- Outbound A2A from trip-planner uses **`trip-planner-sa`** until registry OAuth bindings exist (`AUTH_PROVIDER_BINDING`).
+- Mesh governance scripts: `terraform/scripts/discover_mesh.sh`, `apply_mesh_governance.sh`, `resolve_iap_policies.sh`, `setup_agent_gateway.sh`, and readiness gate **`check_mesh_gateway_status.sh`**.
 - Registry **trip-planner→specialist bindings are skipped** until `AUTH_PROVIDER_BINDING` is set; IAP egress uses **`--resource-type=agent-registry`** with registry UIDs from `terraform/registry/mesh-agents.env`.
 - Agent **unit tests run per package**: `cd src/<agent> && uv run pytest tests/unit/` (combined root-level pytest fails on import paths).
 - Junior curriculum is layered in **`docs/guides/00-overview.md` through `05-gateway-policy-demo.md`**.

@@ -6,7 +6,7 @@
   "preferredTransport": "HTTP+JSON",
   "defaultInputModes": ["text/plain"],
   "defaultOutputModes": ["text/plain"],
-  "url": "https://asia-northeast1-aiplatform.googleapis.com/v1/projects/844279876229/locations/asia-northeast1/reasoningEngines/2912483156676313088:query",
+  "url": "https://REGION-aiplatform.googleapis.com/v1/projects/PROJECT/locations/REGION/reasoningEngines/ENGINE_ID",
   "capabilities": {
     "streaming": false
   },

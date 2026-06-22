@@ -28,7 +28,7 @@
     ]
   },
   "version": "0.1.0",
-  "url": "https://asia-northeast1-aiplatform.googleapis.com/v1beta1/projects/844279876229/locations/asia-northeast1/reasoningEngines/787347082510860288/a2a",
+  "url": "https://REGION-aiplatform.googleapis.com/v1beta1/projects/PROJECT/locations/REGION/reasoningEngines/ENGINE_ID/a2a",
   "defaultOutputModes": ["text/plain"],
   "name": "root_agent",
   "preferredTransport": "HTTP+JSON"

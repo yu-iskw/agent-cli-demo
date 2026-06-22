@@ -1,6 +1,8 @@
 # ACCEPTANCE.md — Enterprise Trip-Planner Mesh
 
-Project: `yexperiment` | Region: `asia-northeast1`
+Project: `<your-gcp-project>` | Region: `asia-northeast1`
+
+> **Teardown:** Mesh GCP resources can be removed with [`terraform/scripts/teardown_mesh.sh`](../terraform/scripts/teardown_mesh.sh). PoC session notes live under [`docs/archive/yexperiment-poc/`](../archive/yexperiment-poc/).
 
 ## Agent CLI implementation
 
@@ -21,8 +23,8 @@ Project: `yexperiment` | Region: `asia-northeast1`
 - [x] Scaffold + enhance for Agent Runtime
 - [x] Unit tests for A2A mesh wiring (`test_a2a_mesh.py`, specialists)
 - [x] Eval datasets updated per agent
-- [x] Offline eval baselines — `docs/notes/2026-06-21-eval-baseline.md`
-- [x] Deploy to Agent Runtime — `docs/notes/2026-06-21-deploy-endpoints.md`
+- [x] Offline eval baselines — [`docs/archive/yexperiment-poc/2026-06-21-eval-baseline.md`](../archive/yexperiment-poc/2026-06-21-eval-baseline.md)
+- [x] Deploy to Agent Runtime — run `discover_mesh.sh`; see [02 — IAM deploy](../guides/02-iam-deploy.md)
 
 ## Governance (M3)
 
@@ -40,22 +42,22 @@ Project: `yexperiment` | Region: `asia-northeast1`
 ## LLMOps
 
 - [x] Eval config per scaffolded project
-- [ ] Cloud Trace verification (post-deploy)
-- [ ] `eval compare` regression baselines
+- [x] Cloud Trace verification (post-deploy) — [`docs/archive/yexperiment-poc/2026-06-21-eval-baseline.md`](../archive/yexperiment-poc/2026-06-21-eval-baseline.md)
+- [x] `eval compare` regression baselines — legacy `results_20260621_195653.json` vs post-SequentialAgent `results_20260622_081402.json` (no regression)
 
 ## Documentation
 
 - [x] `docs/guides/00-overview.md` through `05-gateway-policy-demo.md`
-- [x] `docs/notes/` (session notes)
+- [x] `docs/guides/` and [`docs/archive/yexperiment-poc/`](../archive/yexperiment-poc/) (historical PoC notes)
 - [x] Gateway automation: `terraform/scripts/setup_agent_gateway.sh`, `check_mesh_gateway_status.sh`
 
 ## Human follow-ups
 
-1. Create real Google Groups for mesh personas in `yexperiment`
+1. Create real Google Groups for mesh personas in your GCP project
 2. Create OAuth client; run `./terraform/scripts/setup_agent_gateway.sh --with-oauth --apply-governance`
 3. Redeploy trip-planner with gateway binding (irreversible — use test engine if unsure)
 4. Review DRY_RUN audit logs; switch gateway/IAP to enforce
-5. Run four-persona gateway tests; update `2026-06-21-m3-platform-tests.md`
+5. Run four-persona gateway tests; update [`docs/archive/yexperiment-poc/2026-06-21-m3-platform-tests.md`](../archive/yexperiment-poc/2026-06-21-m3-platform-tests.md)
 
 ## Readiness check
 

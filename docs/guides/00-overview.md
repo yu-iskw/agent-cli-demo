@@ -12,9 +12,9 @@ Welcome. This guide series teaches **Agent Platform**, **Agent CLI**, **A2A**, a
 | flight-researcher | Flight specialist (A2A) | [`src/flight-researcher/`](../../src/flight-researcher/README.md) |
 | hotel-researcher  | Hotel specialist (A2A)  | [`src/hotel-researcher/`](../../src/hotel-researcher/README.md)   |
 
-**Demo project:** `yexperiment` | **Region:** `asia-northeast1` | **Access:** private only
+**Demo project:** `<your-gcp-project>` | **Region:** `asia-northeast1` | **Access:** private only
 
-Live engine IDs: [`docs/notes/2026-06-21-deploy-endpoints.md`](../notes/2026-06-21-deploy-endpoints.md)
+Live engine IDs: run [`terraform/scripts/discover_mesh.sh`](../../terraform/scripts/discover_mesh.sh) after deploy (writes `terraform/registry/mesh-agents.env`).
 
 ---
 
@@ -27,14 +27,14 @@ Live engine IDs: [`docs/notes/2026-06-21-deploy-endpoints.md`](../notes/2026-06-
 | **Agent Platform**         | Google Cloud managed service for running agents (Runtime, Registry, Gateway, IAP)             | Deploy target `agent_runtime`                                                       |
 | **A2A**                    | Agent-to-Agent protocol — HTTP+JSON messages between agents (`message:send`)                  | trip-planner → flight/hotel via `RemoteA2aAgent`                                    |
 | **AgentCard**              | JSON manifest describing an A2A agent (skills, URL, capabilities)                             | Bundled in `src/trip-planner/app/cards/`                                            |
-| **Reasoning Engine**       | A deployed agent instance on Agent Runtime (has a numeric **engine ID**)                      | e.g. trip-planner `2464937943706370048`                                             |
+| **Reasoning Engine**       | A deployed agent instance on Agent Runtime (has a numeric **engine ID**)                      | e.g. trip-planner `${TRIP_PLANNER_ENGINE_ID}`                                       |
 | **Agent Registry**         | Catalog of agents with UIDs, services, and bindings (governance layer)                        | See `terraform/registry/mesh-agents.env`                                            |
 | **Binding**                | A link in the Registry that connects two agents (or an auth provider to an agent)             | trip-planner→specialist bindings pending `AUTH_PROVIDER_BINDING`                    |
-| **Auth provider**          | OAuth connector that proves _who the human user is_ (Google Groups, claims)                   | Planned: `mesh-oauth-3lo` connector in `yexperiment`                                |
+| **Auth provider**          | OAuth connector that proves _who the human user is_ (Google Groups, claims)                   | Planned: `mesh-oauth-3lo` connector in `<your-gcp-project>`                         |
 | **Delegate authorization** | Gateway extension that forwards user identity claims so downstream A2A calls respect personas | `mesh-iap-authz-ext` in DRY_RUN; see [05 — Gateway demo](05-gateway-policy-demo.md) |
 | **DRY_RUN**                | Audit-only policy mode — decisions are logged but not enforced                                | IAP egress + gateway authz start here before Enforce                                |
-| **Egress gateway**         | Outbound path: orchestrator → specialists (governed A2A)                                      | `mesh-egress-gateway` (exists in `yexperiment`)                                     |
-| **Ingress gateway**        | Inbound path: human browser → trip-planner (OAuth entry)                                      | `mesh-ingress-gateway` (exists in `yexperiment`)                                    |
+| **Egress gateway**         | Outbound path: orchestrator → specialists (governed A2A)                                      | `mesh-egress-gateway` (exists in `<your-gcp-project>`)                              |
+| **Ingress gateway**        | Inbound path: human browser → trip-planner (OAuth entry)                                      | `mesh-ingress-gateway` (exists in `<your-gcp-project>`)                             |
 | **MCP**                    | Model Context Protocol — tools/resources for LLM apps (different from A2A)                    | **Not used** for inter-agent calls in this mesh                                     |
 | **LLMOps**                 | Operating LLM agents: eval, traces, logging, monitoring                                       | `agents-cli eval`, Cloud Trace, optional log buckets                                |
 | **ADC**                    | Application Default Credentials — how code authenticates to GCP                               | `gcloud auth application-default login`                                             |
@@ -107,7 +107,7 @@ flowchart LR
 
 External callers never reach specialists directly. Everyone enters through **trip-planner**; the orchestrator delegates to specialists over governed A2A.
 
-**Current state in `yexperiment` (2026-06-21):** `mesh-egress-gateway` and `mesh-ingress-gateway` **exist**. IAP authz extension is in **DRY_RUN**. The **OAuth persona path** (connector, registry bindings, four-persona browser tests) is **still in progress** — see [05 — Gateway demo](05-gateway-policy-demo.md).
+**Current state in `<your-gcp-project>` (2026-06-21):** `mesh-egress-gateway` and `mesh-ingress-gateway` **exist**. IAP authz extension is in **DRY_RUN**. The **OAuth persona path** (connector, registry bindings, four-persona browser tests) is **still in progress** — see [05 — Gateway demo](05-gateway-policy-demo.md).
 
 ```mermaid
 flowchart TB
@@ -117,7 +117,7 @@ flowchart TB
     Dev["Developer<br/>Console or agents-cli"]
   end
 
-  subgraph Platform["Gemini Enterprise Agent Platform — yexperiment"]
+  subgraph Platform["Gemini Enterprise Agent Platform — <your-gcp-project>"]
     IGW["mesh-ingress-gateway<br/>exists"]
     EGW["mesh-egress-gateway<br/>exists"]
     TP["trip-planner<br/>Reasoning Engine"]
@@ -267,11 +267,11 @@ Typical first session: `cd src/flight-researcher && agents-cli install && uv run
 
 ## What Agent Platform layers are (taught summary)
 
-**Agent Runtime** is the execution plane. When you deploy, Google Cloud builds a container, assigns a **Reasoning Engine ID**, and exposes HTTPS endpoints for queries and A2A. Your ADK `App` becomes a long-running service. Developers see engine IDs in the Console and in `docs/notes/2026-06-21-deploy-endpoints.md`.
+**Agent Runtime** is the execution plane. When you deploy, Google Cloud builds a container, assigns a **Reasoning Engine ID**, and exposes HTTPS endpoints for queries and A2A. Your ADK `App` becomes a long-running service. Developers see engine IDs in the Console and in `docs/archive/yexperiment-poc/2026-06-21-deploy-endpoints.md`.
 
 **Agent Registry** is the governance catalog. Each deployed agent with `--agent-identity` gets a **registry agent UID** (stored in `terraform/registry/mesh-agents.env`). **Services** and **bindings** describe how agents connect — for example, trip-planner bound to flight-researcher with an auth provider so outbound calls carry the user's persona. Until `AUTH_PROVIDER_BINDING` is set, some bindings are skipped by automation scripts.
 
-**Agent Gateway** provides controlled network paths. **Ingress** (`mesh-ingress-gateway`) is where browser users sign in with OAuth and reach trip-planner only. **Egress** (`mesh-egress-gateway`) is where trip-planner's outbound A2A to specialists is routed and observed. Both gateways **already exist** in `yexperiment`; completing OAuth and persona tests is the remaining work.
+**Agent Gateway** provides controlled network paths. **Ingress** (`mesh-ingress-gateway`) is where browser users sign in with OAuth and reach trip-planner only. **Egress** (`mesh-egress-gateway`) is where trip-planner's outbound A2A to specialists is routed and observed. Both gateways **already exist** in `<your-gcp-project>`; completing OAuth and persona tests is the remaining work.
 
 **IAP (Identity-Aware Proxy) policies** answer "may this identity invoke this agent?" at ingress and on agent-to-agent egress. Policies can run in **DRY_RUN** (audit-only) or **Enforce**. **Delegate authorization** is a gateway extension that propagates OAuth user claims so specialist calls respect the same persona matrix as the entry point.
 
@@ -321,9 +321,9 @@ External docs — read after your first local run (G1), not before.
 
 ## Related notes
 
-- A2A refactor rationale: [`docs/notes/2026-06-21-a2a-mesh-refactor.md`](../notes/2026-06-21-a2a-mesh-refactor.md)
+- A2A refactor rationale: [`docs/archive/yexperiment-poc/2026-06-21-a2a-mesh-refactor.md`](../archive/yexperiment-poc/2026-06-21-a2a-mesh-refactor.md)
 - Acceptance checklist: [`docs/notes/ACCEPTANCE.md`](../notes/ACCEPTANCE.md)
-- Gateway setup session: [`docs/notes/2026-06-21-agent-gateway-setup.md`](../notes/2026-06-21-agent-gateway-setup.md)
+- Gateway setup session: [`docs/archive/yexperiment-poc/2026-06-21-agent-gateway-setup.md`](../archive/yexperiment-poc/2026-06-21-agent-gateway-setup.md)
 
 ---
 

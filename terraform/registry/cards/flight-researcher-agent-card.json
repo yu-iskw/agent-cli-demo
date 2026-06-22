@@ -1,5 +1,5 @@
 {
-  "url": "https://asia-northeast1-aiplatform.googleapis.com/v1beta1/projects/844279876229/locations/asia-northeast1/reasoningEngines/8436148099646226432/a2a",
+  "url": "https://REGION-aiplatform.googleapis.com/v1beta1/projects/PROJECT/locations/REGION/reasoningEngines/ENGINE_ID/a2a",
   "capabilities": {
     "streaming": false,
     "extensions": [

@@ -173,7 +173,7 @@ cd ../trip-planner && uv run pytest tests/unit/ -q
 **What happened:** Each agent's unit suite validated tools, agent wiring, and (for trip-planner) A2A mesh structure. `test_a2a_mesh.py` asserts:
 
 - Two `RemoteA2aAgent` sub-agents named `flight_researcher` and `hotel_researcher`
-- Bundled AgentCards validate and reference deployed engine IDs (`8436148099646226432`, `787347082510860288`)
+- Bundled AgentCards validate and reference deployed engine IDs (`${FLIGHT_ENGINE_ID}`, `${HOTEL_ENGINE_ID}`)
 
 **Expected output:** Three consecutive pytest runs, each ending with `passed` and exit code **0**. Trip-planner output includes at least:
 
@@ -191,12 +191,12 @@ Query the live Agent Runtime orchestrator; A2A delegation hits **deployed** spec
 ```bash
 cd src/trip-planner
 agents-cli run --url \
-  "https://asia-northeast1-aiplatform.googleapis.com/v1beta1/projects/yexperiment/locations/asia-northeast1/reasoningEngines/2464937943706370048" \
+  "https://asia-northeast1-aiplatform.googleapis.com/v1beta1/projects/<your-gcp-project>/locations/asia-northeast1/reasoningEngines/${TRIP_PLANNER_ENGINE_ID}" \
   --mode adk \
   "Plan a trip from NYC to San Francisco with flights and hotels."
 ```
 
-Engine URLs and console links: [`docs/notes/2026-06-21-deploy-endpoints.md`](../notes/2026-06-21-deploy-endpoints.md).
+Engine URLs and console links: [`docs/archive/yexperiment-poc/2026-06-21-deploy-endpoints.md`](../archive/yexperiment-poc/2026-06-21-deploy-endpoints.md).
 
 ```mermaid
 sequenceDiagram
@@ -230,7 +230,7 @@ sequenceDiagram
 
 **Expected output:** A natural-language trip plan mentioning **both** flight options (airlines, times, prices) **and** hotel options (names, rates). You should **not** see `a2a_required`, mock-only delegate errors, or a plan with only one section unless the model stopped early (retry once).
 
-**Alternative:** [Console playground](https://console.cloud.google.com/vertex-ai/agents/agent-engines/locations/asia-northeast1/agent-engines/2464937943706370048/playground?project=yexperiment) with the same prompt.
+**Alternative:** [Console playground](https://console.cloud.google.com/vertex-ai/agents/agent-engines/locations/asia-northeast1/agent-engines/${TRIP_PLANNER_ENGINE_ID}/playground?project=<your-gcp-project>) with the same prompt.
 
 ---
 
@@ -261,7 +261,7 @@ cd src/trip-planner
 agents-cli eval run --region global
 ```
 
-Baselines and metrics: [`docs/notes/2026-06-21-eval-baseline.md`](../notes/2026-06-21-eval-baseline.md).
+Baselines and metrics: [`docs/archive/yexperiment-poc/2026-06-21-eval-baseline.md`](../archive/yexperiment-poc/2026-06-21-eval-baseline.md).
 
 ```mermaid
 flowchart LR
@@ -394,7 +394,7 @@ uv run pytest tests/unit/test_a2a_mesh.py -q
 
 # 3. (Optional) Live mesh — expect flight + hotel sections in response
 agents-cli run --url \
-  "https://asia-northeast1-aiplatform.googleapis.com/v1beta1/projects/yexperiment/locations/asia-northeast1/reasoningEngines/2464937943706370048" \
+  "https://asia-northeast1-aiplatform.googleapis.com/v1beta1/projects/<your-gcp-project>/locations/asia-northeast1/reasoningEngines/${TRIP_PLANNER_ENGINE_ID}" \
   --mode adk \
   "Plan NYC to SFO with flights and hotels."
 ```
@@ -424,8 +424,8 @@ agents-cli run --url \
 ## Further reading
 
 - [00 — Overview](00-overview.md) — glossary, platform layers, syllabus
-- A2A refactor notes: [`docs/notes/2026-06-21-a2a-mesh-refactor.md`](../notes/2026-06-21-a2a-mesh-refactor.md)
-- Eval baselines: [`docs/notes/2026-06-21-eval-baseline.md`](../notes/2026-06-21-eval-baseline.md)
+- A2A refactor notes: [`docs/archive/yexperiment-poc/2026-06-21-a2a-mesh-refactor.md`](../archive/yexperiment-poc/2026-06-21-a2a-mesh-refactor.md)
+- Eval baselines: [`docs/archive/yexperiment-poc/2026-06-21-eval-baseline.md`](../archive/yexperiment-poc/2026-06-21-eval-baseline.md)
 
 ---
 

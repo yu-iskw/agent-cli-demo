@@ -43,10 +43,15 @@ for arg in "$@"; do
 done
 
 # shellcheck disable=SC1090
+if [[ ! -f ${ENV_FILE} ]]; then
+	echo "error: missing ${ENV_FILE}; run ./terraform/scripts/discover_mesh.sh after deploy" >&2
+	exit 1
+fi
 source "${ENV_FILE}"
 
-PROJECT="${PROJECT:-yexperiment}"
-REGION="${REGION:-asia-northeast1}"
+# shellcheck disable=SC1091
+source "${SCRIPT_DIR}/require_project.sh"
+
 EGRESS_GATEWAY_ID="${MESH_EGRESS_GATEWAY_ID:-mesh-egress-gateway}"
 INGRESS_GATEWAY_ID="${MESH_INGRESS_GATEWAY_ID:-mesh-ingress-gateway}"
 OAUTH_CONNECTOR_ID="${MESH_OAUTH_CONNECTOR_ID:-mesh-oauth-3lo}"
@@ -68,10 +73,15 @@ phase1_gateways() {
 	if ! gcloud alpha network-services agent-gateways describe "${EGRESS_GATEWAY_ID}" \
 		--project="${PROJECT}" --location="${REGION}" >/dev/null 2>&1; then
 		log "  import egress gateway ${EGRESS_GATEWAY_ID}"
+		local rendered
+		rendered="$(mktemp)"
+		sed "s|PROJECT|${PROJECT}|g; s|REGION|${REGION}|g" \
+			"${GATEWAY_DIR}/mesh-egress-gateway.yaml" >"${rendered}"
 		gcloud alpha network-services agent-gateways import "${EGRESS_GATEWAY_ID}" \
-			--source="${GATEWAY_DIR}/mesh-egress-gateway.yaml" \
+			--source="${rendered}" \
 			--location="${REGION}" \
 			--project="${PROJECT}"
+		rm -f "${rendered}"
 	else
 		log "  skip: egress gateway ${EGRESS_GATEWAY_ID} exists"
 	fi

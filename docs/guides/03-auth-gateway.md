@@ -43,7 +43,7 @@ flowchart TB
   end
 
   subgraph Entry["Single entry agent"]
-    TP["trip-planner<br/>engine 2464937943706370048<br/>Registry + IAP ingress"]
+    TP["trip-planner<br/>engine ${TRIP_PLANNER_ENGINE_ID}<br/>Registry + IAP ingress"]
   end
 
   subgraph Mesh["Not directly reachable"]
@@ -66,7 +66,7 @@ flowchart TB
 - **trip-planner-sa** — the service account trip-planner uses for outbound A2A until registry bindings (M3-2b) are complete.
 - **M3-2a vs M3-2b** — IAM ingress is applied today; OAuth Gateway wiring is the next milestone (guide 05).
 
-| Path                 | Caller                  | Token type                    | Status in `yexperiment`           |
+| Path                 | Caller                  | Token type                    | Status in `<your-gcp-project>`    |
 | -------------------- | ----------------------- | ----------------------------- | --------------------------------- |
 | M3-2a IAM ingress    | CI, ADC user, operators | Identity / access token (IAM) | Applied via governance script     |
 | M3-2b OAuth Gateway  | Browser users           | OAuth 3LO + group claims      | Gateways exist; connector pending |
@@ -119,7 +119,7 @@ API keys are **not** used for this private mesh.
 
 ### IAM ingress (M3-2a)
 
-**In plain English:** Before trip-planner runs your prompt, IAP checks whether your IAM principal (for example `user:you@example.com`) is on the allow list. The check uses the **registry agent UID** from `mesh-agents.env`, not the numeric Reasoning Engine ID. If you are allowed, the query reaches engine `2464937943706370048`; if not, you get **403 Forbidden** before the agent sees the request.
+**In plain English:** Before trip-planner runs your prompt, IAP checks whether your IAM principal (for example `user:you@example.com`) is on the allow list. The check uses the **registry agent UID** from `mesh-agents.env`, not the numeric Reasoning Engine ID. If you are allowed, the query reaches engine `${TRIP_PLANNER_ENGINE_ID}`; if not, you get **403 Forbidden** before the agent sees the request.
 
 ```mermaid
 sequenceDiagram
@@ -200,7 +200,7 @@ flowchart TB
   end
 
   subgraph Request["HTTP POST"]
-    URL["TRIP_PLANNER_QUERY_URL<br/>reasoningEngines/2464937943706370048:query"]
+    URL["TRIP_PLANNER_QUERY_URL<br/>reasoningEngines/${TRIP_PLANNER_ENGINE_ID}:query"]
     Body['{"input":{"text":"Plan NYC to SFO..."}}']
     A2 --> URL
     B3 --> URL
@@ -222,7 +222,7 @@ flowchart TB
 ### How to read this diagram — how-to-read-this-diagram-how-t (5)
 
 - **Two token sources** — either works if the underlying principal is in `MESH_IAM_TEST_MEMBERS`; identity tokens are often simpler for user smoke tests.
-- **TRIP_PLANNER_QUERY_URL** — defined in `terraform/registry/mesh-agents.env`; must match live engine `2464937943706370048`.
+- **TRIP_PLANNER_QUERY_URL** — defined in `terraform/registry/mesh-agents.env`; must match live engine `${TRIP_PLANNER_ENGINE_ID}`.
 - **403 vs 401** — 401 means the token itself is invalid; 403 means the token was valid but IAP rejected the principal.
 - **400 vs 403** — 400 is a client mistake (wrong JSON shape, missing `input`); 403 is authorization. Do not confuse a malformed body with "access denied."
 - **200 does not guarantee full mesh** — ingress passed; egress persona rules may still block flight or hotel under governance (guide 04).
@@ -281,18 +281,18 @@ curl -sS -w "\nHTTP %{http_code}\n" -X POST \
 
 ### Micro-tutorial: What is live vs deferred for M3-2b
 
-| Resource                   | Status in `yexperiment` / `asia-northeast1`      |
-| -------------------------- | ------------------------------------------------ |
-| `mesh-egress-gateway`      | Created                                          |
-| `mesh-ingress-gateway`     | Created                                          |
-| `mesh-iap-authz-ext`       | Created (`iamEnforcementMode: DRY_RUN`)          |
-| `mesh-oauth-3lo` connector | **Not yet created**                              |
-| Registry bindings          | **Blocked** until `AUTH_PROVIDER_BINDING` is set |
+| Resource                   | Status in `<your-gcp-project>` / `asia-northeast1` |
+| -------------------------- | -------------------------------------------------- |
+| `mesh-egress-gateway`      | Created                                            |
+| `mesh-ingress-gateway`     | Created                                            |
+| `mesh-iap-authz-ext`       | Created (`iamEnforcementMode: DRY_RUN`)            |
+| `mesh-oauth-3lo` connector | **Not yet created**                                |
+| Registry bindings          | **Blocked** until `AUTH_PROVIDER_BINDING` is set   |
 
 When the OAuth connector exists, export:
 
 ```bash
-export AUTH_PROVIDER_BINDING="projects/yexperiment/locations/asia-northeast1/connectors/mesh-oauth-3lo"
+export AUTH_PROVIDER_BINDING="projects/<your-gcp-project>/locations/asia-northeast1/connectors/mesh-oauth-3lo"
 ./terraform/scripts/apply_mesh_governance.sh
 ```
 
@@ -302,12 +302,12 @@ Full gateway + policy demo steps: **[05 — Gateway policy demo](05-gateway-poli
 
 ## Verify
 
-| Test               | Command / action                                              | Expected                                   |
-| ------------------ | ------------------------------------------------------------- | ------------------------------------------ |
-| Allowed member     | curl smoke with your user token                               | HTTP **200**, trip plan JSON               |
-| Denied member      | Same curl from user not in `MESH_IAM_TEST_MEMBERS`            | HTTP **403**                               |
-| Malformed request  | POST with `{}` or missing `input`                             | HTTP **400**                               |
-| Console playground | Open trip-planner playground for engine `2464937943706370048` | Works with your GCP login (developer path) |
+| Test               | Command / action                                                    | Expected                                   |
+| ------------------ | ------------------------------------------------------------------- | ------------------------------------------ |
+| Allowed member     | curl smoke with your user token                                     | HTTP **200**, trip plan JSON               |
+| Denied member      | Same curl from user not in `MESH_IAM_TEST_MEMBERS`                  | HTTP **403**                               |
+| Malformed request  | POST with `{}` or missing `input`                                   | HTTP **400**                               |
+| Console playground | Open trip-planner playground for engine `${TRIP_PLANNER_ENGINE_ID}` | Works with your GCP login (developer path) |
 
 ```bash
 # Quick status of gateway prerequisites (OAuth connector may still fail until created)

@@ -27,18 +27,18 @@ Three names, one trip-planner—do not swap them in commands.
 | Concept                | Trip-planner example                                 | Plain English                                                  |
 | ---------------------- | ---------------------------------------------------- | -------------------------------------------------------------- |
 | **Reasoning Engine**   | Managed runtime hosting the ADK app                  | “The running agent container in Agent Runtime.”                |
-| **Engine ID**          | `2464937943706370048`                                | Numeric ID in deploy URLs, playground, `agents-cli run --url`. |
+| **Engine ID**          | `${TRIP_PLANNER_ENGINE_ID}`                          | Numeric ID in deploy URLs, playground, `agents-cli run --url`. |
 | **Registry agent UID** | `agentregistry-00000000-0000-0000-951b-1e5d969e3b7b` | Catalog ID for governance: IAP, ingress, bindings.             |
 
 **IAP always uses the registry UID** with `--resource-type=agent-registry` and values from [`terraform/registry/mesh-agents.env`](../../terraform/registry/mesh-agents.env). Passing an engine ID to `--agent=` will fail or target the wrong resource.
 
 All three mesh agents (live engine IDs):
 
-| Agent             | Engine ID             | Registry UID variable         |
-| ----------------- | --------------------- | ----------------------------- |
-| flight-researcher | `8436148099646226432` | `FLIGHT_REGISTRY_AGENT`       |
-| hotel-researcher  | `787347082510860288`  | `HOTEL_REGISTRY_AGENT`        |
-| trip-planner      | `2464937943706370048` | `TRIP_PLANNER_REGISTRY_AGENT` |
+| Agent             | Engine ID                   | Registry UID variable         |
+| ----------------- | --------------------------- | ----------------------------- |
+| flight-researcher | `${FLIGHT_ENGINE_ID}`       | `FLIGHT_REGISTRY_AGENT`       |
+| hotel-researcher  | `${HOTEL_ENGINE_ID}`        | `HOTEL_REGISTRY_AGENT`        |
+| trip-planner      | `${TRIP_PLANNER_ENGINE_ID}` | `TRIP_PLANNER_REGISTRY_AGENT` |
 
 ### Governance stack
 
@@ -52,7 +52,7 @@ flowchart TB
   end
 
   subgraph Orchestration["Orchestration"]
-    TP["trip-planner Reasoning Engine<br/>2464937943706370048<br/>runtime: trip-planner-sa"]
+    TP["trip-planner Reasoning Engine<br/>${TRIP_PLANNER_ENGINE_ID}<br/>runtime: trip-planner-sa"]
   end
 
   subgraph Egress["Egress — per specialist IAP"]
@@ -67,8 +67,8 @@ flowchart TB
 
   IAM --> TP
   OAuth --> TP
-  TP --> IAPF --> FR["flight-researcher<br/>8436148099646226432"]
-  TP --> IAPH --> HR["hotel-researcher<br/>787347082510860288"]
+  TP --> IAPF --> FR["flight-researcher<br/>${FLIGHT_ENGINE_ID}"]
+  TP --> IAPH --> HR["hotel-researcher<br/>${HOTEL_ENGINE_ID}"]
   SVC --- FR
   SVC --- HR
   BIND -.->|"Phase 2 skipped<br/>until OAuth ready"| TP
@@ -210,7 +210,7 @@ flowchart LR
 - **`a2a_auth.py`** satisfies “authenticated caller is trip-planner-sa”; IAP CEL decides “end user group allowed for this specialist.”
 - **Right (platform)** owns the persona matrix—changes go to policy JSON and gateway config, not `if group in os.environ`.
 - **AgentCards** describe specialists for A2A discovery; registry **services** publish governance-facing cards separately in Phase 1.
-- Removing `mesh_auth` Python modules was intentional—see [`docs/notes/2026-06-21-a2a-mesh-refactor.md`](../notes/2026-06-21-a2a-mesh-refactor.md).
+- Removing `mesh_auth` Python modules was intentional—see [`docs/archive/yexperiment-poc/2026-06-21-a2a-mesh-refactor.md`](../archive/yexperiment-poc/2026-06-21-a2a-mesh-refactor.md).
 
 ---
 
@@ -222,7 +222,7 @@ flowchart LR
 | IAM ingress (recommended) | [03 — Auth gateway](03-auth-gateway.md)                                   |
 | `gcloud` beta IAP         | `gcloud beta iap web ...`                                                 |
 | ADC                       | `gcloud auth application-default login`                                   |
-| Project access            | `yexperiment` / `asia-northeast1`                                         |
+| Project access            | `<your-gcp-project>` / `asia-northeast1`                                  |
 
 ```bash
 source terraform/registry/mesh-agents.env
@@ -249,7 +249,7 @@ curl -sS -H "Authorization: Bearer ${TOKEN}" \
 
 Use hostname **`agentregistry.googleapis.com`** (global API host)—not `{region}-agentregistry.googleapis.com`.
 
-Session notes: [`docs/notes/2026-06-21-m3-discovery.md`](../notes/2026-06-21-m3-discovery.md).
+Session notes: [`docs/archive/yexperiment-poc/2026-06-21-m3-discovery.md`](../archive/yexperiment-poc/2026-06-21-m3-discovery.md).
 
 ### Micro-tutorial 2 — Run apply_mesh_governance.sh
 
@@ -307,7 +307,7 @@ gcloud beta iap web set-iam-policy terraform/policies/agent-to-agent-hotel.resol
   --resource-type=agent-registry --agent="${HOTEL_REGISTRY_AGENT}"
 ```
 
-**Notice:** `--agent=` is the **registry UID**, e.g. `agentregistry-00000000-0000-0000-8ad9-56c0770a61aa` for flight—not `8436148099646226432`.
+**Notice:** `--agent=` is the **registry UID**, e.g. `agentregistry-00000000-0000-0000-8ad9-56c0770a61aa` for flight—not `${FLIGHT_ENGINE_ID}`.
 
 ### Micro-tutorial 4 — DRY_RUN before enforce
 
@@ -318,7 +318,7 @@ gcloud beta iap web set-iam-policy terraform/policies/agent-to-agent-hotel.resol
 3. Exercise persona queries; review audit logs for group claim evaluation.
 4. Switch to **enforce** when logs match the persona matrix.
 
-Gateways **`mesh-egress-gateway`** and **`mesh-ingress-gateway`** already exist in `yexperiment`; OAuth connector and live persona tests may still be pending.
+Gateways **`mesh-egress-gateway`** and **`mesh-ingress-gateway`** already exist in `<your-gcp-project>`; OAuth connector and live persona tests may still be pending.
 
 ---
 

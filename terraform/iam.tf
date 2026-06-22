@@ -44,5 +44,5 @@ resource "google_project_iam_member" "operator_deploy" {
   member  = "serviceAccount:${google_service_account.operator.email}"
 }
 
-# Demo persona groups: bind in M3 after creating real Google Groups in yexperiment.
+# Demo persona groups: bind in M3 after creating real Google Groups in your project.
 # See terraform/policies/README.md and docs/guides/04-mesh-governance.md.

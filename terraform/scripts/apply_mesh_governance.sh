@@ -17,11 +17,17 @@ ENV_FILE="${REPO_ROOT}/terraform/registry/mesh-agents.env"
 CARDS_DIR="${REPO_ROOT}/terraform/registry/cards"
 POLICIES_DIR="${REPO_ROOT}/terraform/policies"
 
+if [[ ! -f ${ENV_FILE} ]]; then
+	echo "error: missing ${ENV_FILE}; run ./terraform/scripts/discover_mesh.sh after deploy" >&2
+	exit 1
+fi
+
 # shellcheck disable=SC1090
 source "${ENV_FILE}"
 
-PROJECT="${PROJECT:-${GOOGLE_CLOUD_PROJECT:-yexperiment}}"
-REGION="${REGION:-${GOOGLE_CLOUD_LOCATION:-asia-northeast1}}"
+# shellcheck disable=SC1091
+source "${SCRIPT_DIR}/require_project.sh"
+
 REGISTRY_BASE="https://agentregistry.googleapis.com/v1alpha/projects/${PROJECT}/locations/${REGION}"
 
 EXPECTED_AGENTS=(

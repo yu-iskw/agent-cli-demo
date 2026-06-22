@@ -1,6 +1,6 @@
 # 02 — Private IAM deploy
 
-Deploy the three-agent trip-planner mesh to **Agent Runtime** in `yexperiment` / `asia-northeast1`. This guide uses a **diagram-first** layout with short micro-tutorials so you can see the whole system before running commands.
+Deploy the three-agent trip-planner mesh to **Agent Runtime** in `<your-gcp-project>` / `asia-northeast1`. This guide uses a **diagram-first** layout with short micro-tutorials so you can see the whole system before running commands.
 
 **Previous:** [01 — Local mesh](01-local-mesh.md) | **Next:** [03 — Auth gateway](03-auth-gateway.md)
 
@@ -26,7 +26,7 @@ Junior engineers often mix these up. They are **different objects** for **differ
 | Name                   | Example in this repo                                 | Plain English                                               | When you need it                                               |
 | ---------------------- | ---------------------------------------------------- | ----------------------------------------------------------- | -------------------------------------------------------------- |
 | **Reasoning Engine**   | A live runtime container for one ADK app             | “The deployed agent instance on Agent Platform.”            | Console playground, Cloud Trace, understanding what is running |
-| **Engine ID**          | `2464937943706370048` (trip-planner)                 | The **numeric ID** Google assigns to that Reasoning Engine. | `agents-cli run --url`, A2A URLs, updating bundled AgentCards  |
+| **Engine ID**          | `${TRIP_PLANNER_ENGINE_ID}` (trip-planner)           | The **numeric ID** Google assigns to that Reasoning Engine. | `agents-cli run --url`, A2A URLs, updating bundled AgentCards  |
 | **Registry agent UID** | `agentregistry-00000000-0000-0000-951b-1e5d969e3b7b` | A **governance catalog entry** for the same logical agent.  | IAP policies, ingress bindings, registry services—not deploy   |
 
 **Rule of thumb:** Deploy and debug runtime with **engine IDs**. Govern access with **registry UIDs** from [`terraform/registry/mesh-agents.env`](../../terraform/registry/mesh-agents.env). Guide [04 — Mesh governance](04-mesh-governance.md) covers registry and IAP.
@@ -123,7 +123,7 @@ flowchart TD
   Q{"Which agent are you deploying?"}
   Q -->|flight-researcher<br/>or hotel-researcher| Leaf["Use --agent-identity"]
   Q -->|trip-planner<br/>orchestrator| Orch{"Need outbound A2A<br/>to specialists?"}
-  Orch -->|yes| SA["Use --service-account<br/>trip-planner-sa@yexperiment..."]
+  Orch -->|yes| SA["Use --service-account<br/>trip-planner-sa@<your-gcp-project>..."]
   Orch -->|no| AI2["--agent-identity possible<br/>but not this mesh"]
 
   Leaf --> WhyLeaf["Platform-managed identity<br/>for leaf specialists"]
@@ -135,17 +135,17 @@ flowchart TD
 
 - **Leaf specialists** (flight, hotel) take **`--agent-identity`**: Google issues a platform agent identity automatically.
 - **trip-planner** is the only agent that **calls other agents**; it uses **`trip-planner-sa`** so `GoogleCloudAuth` in `a2a_auth.py` can obtain tokens via ADC.
-- **`--agent-identity` on trip-planner** failed with **401** on outbound A2A until registry OAuth bindings exist (M3-2b)—documented in [`docs/notes/2026-06-21-a2a-mesh-refactor.md`](../notes/2026-06-21-a2a-mesh-refactor.md).
+- **`--agent-identity` on trip-planner** failed with **401** on outbound A2A until registry OAuth bindings exist (M3-2b)—documented in [`docs/archive/yexperiment-poc/2026-06-21-a2a-mesh-refactor.md`](../archive/yexperiment-poc/2026-06-21-a2a-mesh-refactor.md).
 - You **cannot** flip identity mode on an existing engine in one update; recreate trip-planner if you must switch.
 - **Deploy** still runs as **`agent-operator-sa`** (impersonation)—that is separate from **runtime** identity.
 
 ### Live engine IDs and runtime identity (reference)
 
-| Agent             | Engine ID             | Deploy flag                             | Runtime caller identity |
-| ----------------- | --------------------- | --------------------------------------- | ----------------------- |
-| flight-researcher | `8436148099646226432` | `--agent-identity`                      | Platform agent identity |
-| hotel-researcher  | `787347082510860288`  | `--agent-identity`                      | Platform agent identity |
-| trip-planner      | `2464937943706370048` | `--service-account trip-planner-sa@...` | `trip-planner-sa`       |
+| Agent             | Engine ID                   | Deploy flag                             | Runtime caller identity |
+| ----------------- | --------------------------- | --------------------------------------- | ----------------------- |
+| flight-researcher | `${FLIGHT_ENGINE_ID}`       | `--agent-identity`                      | Platform agent identity |
+| hotel-researcher  | `${HOTEL_ENGINE_ID}`        | `--agent-identity`                      | Platform agent identity |
+| trip-planner      | `${TRIP_PLANNER_ENGINE_ID}` | `--service-account trip-planner-sa@...` | `trip-planner-sa`       |
 
 Registry UID for trip-planner (governance, not deploy): `TRIP_PLANNER_REGISTRY_AGENT=agentregistry-00000000-0000-0000-951b-1e5d969e3b7b` in [`mesh-agents.env`](../../terraform/registry/mesh-agents.env).
 
@@ -185,9 +185,9 @@ flowchart TB
   end
 
   subgraph Engines["Reasoning Engines — asia-northeast1"]
-    FR["flight-researcher<br/>8436148099646226432"]
-    HR["hotel-researcher<br/>787347082510860288"]
-    TP["trip-planner<br/>2464937943706370048"]
+    FR["flight-researcher<br/>${FLIGHT_ENGINE_ID}"]
+    HR["hotel-researcher<br/>${HOTEL_ENGINE_ID}"]
+    TP["trip-planner<br/>${TRIP_PLANNER_ENGINE_ID}"]
   end
 
   Op -->|"agents-cli deploy"| FR
@@ -221,8 +221,8 @@ flowchart TB
 | Operator impersonation          | Deploy uses **`agent-operator-sa`**, not your user SA             |
 
 ```bash
-export GOOGLE_IMPERSONATE_SERVICE_ACCOUNT=agent-operator-sa@yexperiment.iam.gserviceaccount.com
-export GOOGLE_CLOUD_PROJECT=yexperiment
+export GOOGLE_IMPERSONATE_SERVICE_ACCOUNT=agent-operator-sa@<your-gcp-project>.iam.gserviceaccount.com
+export GOOGLE_CLOUD_PROJECT=<your-gcp-project>
 export GOOGLE_CLOUD_LOCATION=asia-northeast1
 ```
 
@@ -257,7 +257,7 @@ agents-cli scaffold enhance . --deployment-target agent_runtime --region asia-no
 
 ```bash
 cd src/flight-researcher
-agents-cli deploy --project yexperiment --region asia-northeast1 \
+agents-cli deploy --project <your-gcp-project> --region asia-northeast1 \
   --agent-identity --no-confirm-project \
   --update-env-vars "GOOGLE_CLOUD_LOCATION=global"
 ```
@@ -272,7 +272,7 @@ agents-cli deploy --project yexperiment --region asia-northeast1 \
 
 ```bash
 cd ../hotel-researcher
-agents-cli deploy --project yexperiment --region asia-northeast1 \
+agents-cli deploy --project <your-gcp-project> --region asia-northeast1 \
   --agent-identity --no-confirm-project \
   --update-env-vars "GOOGLE_CLOUD_LOCATION=global"
 ```
@@ -285,8 +285,8 @@ agents-cli deploy --project yexperiment --region asia-northeast1 \
 
 ```bash
 cd ../trip-planner
-agents-cli deploy --project yexperiment --region asia-northeast1 \
-  --service-account trip-planner-sa@yexperiment.iam.gserviceaccount.com \
+agents-cli deploy --project <your-gcp-project> --region asia-northeast1 \
+  --service-account trip-planner-sa@<your-gcp-project>.iam.gserviceaccount.com \
   --no-confirm-project \
   --update-env-vars "GOOGLE_CLOUD_LOCATION=global"
 ```
@@ -297,9 +297,9 @@ agents-cli deploy --project yexperiment --region asia-northeast1 \
 sequenceDiagram
   participant Op as Operator<br/>agent-operator-sa
   participant CLI as agents-cli
-  participant FR as flight-researcher<br/>8436148099646226432
-  participant HR as hotel-researcher<br/>787347082510860288
-  participant TP as trip-planner<br/>2464937943706370048
+  participant FR as flight-researcher<br/>${FLIGHT_ENGINE_ID}
+  participant HR as hotel-researcher<br/>${HOTEL_ENGINE_ID}
+  participant TP as trip-planner<br/>${TRIP_PLANNER_ENGINE_ID}
 
   Op->>CLI: deploy flight --agent-identity<br/>GOOGLE_CLOUD_LOCATION=global
   CLI->>FR: Create Reasoning Engine + A2A
@@ -320,6 +320,18 @@ sequenceDiagram
 - **Post-deploy smoke** is trip-planner calling specialists—the first proof of leaf-first ordering.
 - If smoke fails with **401**, confirm trip-planner used **`trip-planner-sa`**, not `--agent-identity`.
 
+### Micro-tutorial D2 — Discover mesh IDs (after deploy)
+
+**Goal:** Write project-specific engine IDs, registry UIDs, and card URLs to local config (not committed).
+
+```bash
+export GOOGLE_CLOUD_PROJECT=<your-gcp-project>
+cp terraform/terraform.tfvars.example terraform/terraform.tfvars   # set project_id
+./terraform/scripts/discover_mesh.sh
+```
+
+This creates `terraform/registry/mesh-agents.env`, resolves IAP policy templates, and patches specialist AgentCard URLs. Governance scripts ([`apply_mesh_governance.sh`](../../terraform/scripts/apply_mesh_governance.sh), [`setup_agent_gateway.sh`](../../terraform/scripts/setup_agent_gateway.sh)) require this file.
+
 ### Micro-tutorial E — AgentCard deploy shim (specialists only)
 
 **Symptom:** Deploy fails with `'AgentCard' object has no attribute 'DESCRIPTOR'`.
@@ -335,17 +347,17 @@ sequenceDiagram
 ```bash
 cd src/trip-planner
 agents-cli run --url \
-  "https://asia-northeast1-aiplatform.googleapis.com/v1beta1/projects/yexperiment/locations/asia-northeast1/reasoningEngines/2464937943706370048" \
+  "https://asia-northeast1-aiplatform.googleapis.com/v1beta1/projects/<your-gcp-project>/locations/asia-northeast1/reasoningEngines/${TRIP_PLANNER_ENGINE_ID}" \
   --mode adk \
   "Plan NYC to SFO with flights and hotels."
 ```
 
-| Check                  | Pass criteria                                                                                                                                                                               |
-| ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Console playground     | [trip-planner playground](https://console.cloud.google.com/vertex-ai/agents/agent-engines/locations/asia-northeast1/agent-engines/2464937943706370048/playground?project=yexperiment) loads |
-| Smoke run              | Response mentions both flights and hotels                                                                                                                                                   |
-| Engine IDs in env file | Match live engines in [`mesh-agents.env`](../../terraform/registry/mesh-agents.env)                                                                                                         |
-| Cloud Trace            | Spans show trip-planner → specialist A2A delegation                                                                                                                                         |
+| Check                  | Pass criteria                                                                                                                                                                                            |
+| ---------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Console playground     | [trip-planner playground](https://console.cloud.google.com/vertex-ai/agents/agent-engines/locations/asia-northeast1/agent-engines/${TRIP_PLANNER_ENGINE_ID}/playground?project=<your-gcp-project>) loads |
+| Smoke run              | Response mentions both flights and hotels                                                                                                                                                                |
+| Engine IDs in env file | Match live engines in [`mesh-agents.env`](../../terraform/registry/mesh-agents.env)                                                                                                                      |
+| Cloud Trace            | Spans show trip-planner → specialist A2A delegation                                                                                                                                                      |
 
 ```bash
 # Optional: deploy status if you used --no-wait
@@ -356,20 +368,53 @@ agents-cli deploy --status
 
 ---
 
+## Teardown
+
+Reverse deploy order to avoid dependency errors. Script: [`terraform/scripts/teardown_mesh.sh`](../../terraform/scripts/teardown_mesh.sh).
+
+```bash
+# Preview (default — no mutations)
+./terraform/scripts/teardown_mesh.sh --dry-run
+
+# Execute full mesh teardown
+./terraform/scripts/teardown_mesh.sh --confirm <your-gcp-project>
+
+# Optional: delete orphan Reasoning Engines not listed in mesh-agents.env
+./terraform/scripts/teardown_mesh.sh --confirm <your-gcp-project> --include-orphans
+
+# Optional: skip root terraform destroy if local state is missing
+./terraform/scripts/teardown_mesh.sh --confirm <your-gcp-project> --skip-terraform
+```
+
+| Phase | Deletes                                           |
+| ----- | ------------------------------------------------- |
+| 1     | Reasoning Engines (trip-planner → hotel → flight) |
+| 2     | IAP policies on registry agents                   |
+| 3     | Registry bindings, services, agents               |
+| 4     | Authz extension + Agent Gateways                  |
+| 5     | OAuth connector (if created)                      |
+| 6     | Root Terraform SAs + IAM (`terraform destroy`)    |
+
+**Not deleted:** GCP project, enabled APIs, OAuth client in Console, Cloud Logging history.
+
+After teardown, [`check_mesh_gateway_status.sh`](../../terraform/scripts/check_mesh_gateway_status.sh) should **exit 1** (expected).
+
+---
+
 ## Troubleshooting
 
-| Symptom                               | Likely cause                                              | Fix                                                                                               |
-| ------------------------------------- | --------------------------------------------------------- | ------------------------------------------------------------------------------------------------- |
-| Deploy permission denied              | Missing impersonation                                     | `export GOOGLE_IMPERSONATE_SERVICE_ACCOUNT=agent-operator-sa@yexperiment.iam.gserviceaccount.com` |
-| Model not found in region             | Regional model gap                                        | Set `GOOGLE_CLOUD_LOCATION=global` on deploy                                                      |
-| 401 on outbound A2A                   | trip-planner on `--agent-identity` without OAuth bindings | Redeploy with `--service-account trip-planner-sa@...`                                             |
-| Cannot switch identity on same engine | Platform constraint                                       | Delete and recreate trip-planner Reasoning Engine                                                 |
-| AgentCard DESCRIPTOR error            | Pydantic/protobuf mismatch                                | Use `a2a_deploy_shim.py` on specialists                                                           |
-| Stale specialist content in plan      | Engine IDs changed                                        | Update `app/cards/*.json`, redeploy trip-planner                                                  |
-| Used engine ID in IAP command         | Wrong identifier type                                     | Use registry UID from `mesh-agents.env` with `--resource-type=agent-registry` (guide 04)          |
-| `mesh-agents.env` smoke URL fails     | Stale `TRIP_PLANNER_ENGINE_ID`                            | Update env file to current engine ID                                                              |
+| Symptom                               | Likely cause                                              | Fix                                                                                                      |
+| ------------------------------------- | --------------------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
+| Deploy permission denied              | Missing impersonation                                     | `export GOOGLE_IMPERSONATE_SERVICE_ACCOUNT=agent-operator-sa@<your-gcp-project>.iam.gserviceaccount.com` |
+| Model not found in region             | Regional model gap                                        | Set `GOOGLE_CLOUD_LOCATION=global` on deploy                                                             |
+| 401 on outbound A2A                   | trip-planner on `--agent-identity` without OAuth bindings | Redeploy with `--service-account trip-planner-sa@...`                                                    |
+| Cannot switch identity on same engine | Platform constraint                                       | Delete and recreate trip-planner Reasoning Engine                                                        |
+| AgentCard DESCRIPTOR error            | Pydantic/protobuf mismatch                                | Use `a2a_deploy_shim.py` on specialists                                                                  |
+| Stale specialist content in plan      | Engine IDs changed                                        | Update `app/cards/*.json`, redeploy trip-planner                                                         |
+| Used engine ID in IAP command         | Wrong identifier type                                     | Use registry UID from `mesh-agents.env` with `--resource-type=agent-registry` (guide 04)                 |
+| `mesh-agents.env` smoke URL fails     | Stale `TRIP_PLANNER_ENGINE_ID`                            | Update env file to current engine ID                                                                     |
 
-Internal deep-dive: [`docs/notes/2026-06-21-a2a-mesh-refactor.md`](../notes/2026-06-21-a2a-mesh-refactor.md).
+Internal deep-dive: [`docs/archive/yexperiment-poc/2026-06-21-a2a-mesh-refactor.md`](../archive/yexperiment-poc/2026-06-21-a2a-mesh-refactor.md).
 
 ---
 

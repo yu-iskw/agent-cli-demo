@@ -21,8 +21,10 @@ def test_bundled_agent_cards_validate() -> None:
     assert isinstance(hotel, AgentCard)
     assert flight.url is not None
     assert hotel.url is not None
-    assert "8436148099646226432" in str(flight.url)
-    assert "787347082510860288" in str(hotel.url)
+    assert "reasoningEngines" in str(flight.url)
+    assert "reasoningEngines" in str(hotel.url)
+    assert "/a2a" in str(flight.url)
+    assert "/a2a" in str(hotel.url)
 
 
 def test_load_agent_card_from_package() -> None:
