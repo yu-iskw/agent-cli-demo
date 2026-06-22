@@ -82,6 +82,7 @@ root = "src/flight-researcher"
 extraPaths = [
   "src/flight-researcher",
   "src/flight-researcher/.venv/lib/python3.12/site-packages",
+  "src/flight-researcher/.venv/lib/python3.13/site-packages",
 ]
 pythonVersion = "3.12"
 
@@ -90,6 +91,7 @@ root = "src/hotel-researcher"
 extraPaths = [
   "src/hotel-researcher",
   "src/hotel-researcher/.venv/lib/python3.12/site-packages",
+  "src/hotel-researcher/.venv/lib/python3.13/site-packages",
 ]
 pythonVersion = "3.12"
 
@@ -98,6 +100,7 @@ root = "src/trip-planner"
 extraPaths = [
   "src/trip-planner",
   "src/trip-planner/.venv/lib/python3.12/site-packages",
+  "src/trip-planner/.venv/lib/python3.13/site-packages",
 ]
 pythonVersion = "3.12"
 
