@@ -16,6 +16,7 @@
 import os
 
 import google.auth
+import google.auth.exceptions
 from google.adk.agents import Agent
 from google.adk.apps import App
 from google.adk.models import Gemini

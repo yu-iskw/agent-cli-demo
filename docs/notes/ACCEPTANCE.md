@@ -2,7 +2,7 @@
 
 Project: `<your-gcp-project>` | Region: `asia-northeast1`
 
-> **Teardown:** Mesh GCP resources can be removed with [`terraform/scripts/teardown_mesh.sh`](../terraform/scripts/teardown_mesh.sh). PoC session notes live under [`docs/archive/yexperiment-poc/`](../archive/yexperiment-poc/).
+> **Teardown:** Mesh GCP resources can be removed with [`terraform/scripts/teardown_mesh.sh`](../../terraform/scripts/teardown_mesh.sh). PoC session notes live under [`docs/archive/yexperiment-poc/`](../archive/yexperiment-poc/).
 
 ## Agent CLI implementation
 

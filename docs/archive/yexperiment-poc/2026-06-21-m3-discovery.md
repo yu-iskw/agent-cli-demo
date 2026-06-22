@@ -42,6 +42,6 @@ Project: `yexperiment` | Region: `asia-northeast1` | Date: 2026-06-21
 | **IAP egress**  | **applied**                         | flight + hotel policies via Phase 4 (`--resource-type=agent-registry`, registry UIDs)          |
 | **IAP ingress** | **applied**                         | trip-planner when `MESH_IAM_TEST_MEMBERS` set (M3-2a)                                          |
 
-Generated env file: [`terraform/registry/mesh-agents.env`](../../terraform/registry/mesh-agents.env).
+Generated env file: `terraform/registry/mesh-agents.env` (template: [`mesh-agents.env.example`](../../../terraform/registry/mesh-agents.env.example)).
 
 Platform test matrix: [`2026-06-21-m3-platform-tests.md`](2026-06-21-m3-platform-tests.md).

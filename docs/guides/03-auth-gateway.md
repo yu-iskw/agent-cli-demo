@@ -253,7 +253,7 @@ Phase 3 of the script adds `roles/iap.httpsResourceAccessor` on the trip-planner
 
 ### Micro-tutorial: IAM smoke test with curl
 
-Source IDs from [`terraform/registry/mesh-agents.env`](../../terraform/registry/mesh-agents.env). **Update `TRIP_PLANNER_*` values** if trip-planner was recreated.
+Source IDs from [`terraform/registry/mesh-agents.env`](../../terraform/registry/mesh-agents.env.example). **Update `TRIP_PLANNER_*` values** if trip-planner was recreated.
 
 ```bash
 source terraform/registry/mesh-agents.env

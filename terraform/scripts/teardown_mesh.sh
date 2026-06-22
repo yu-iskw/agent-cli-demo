@@ -25,7 +25,6 @@ INCLUDE_ORPHANS=false
 SERVICE_IDS=(trip-planner flight-researcher hotel-researcher)
 BINDING_IDS=(trip-planner-to-flight trip-planner-to-hotel)
 ENGINE_IDS=()
-ENGINE_NAMES=()
 REGISTRY_AGENT_UIDS=()
 
 log() {
@@ -112,7 +111,6 @@ load_env() {
 		"${HOTEL_ENGINE_ID}"
 		"${FLIGHT_ENGINE_ID}"
 	)
-	ENGINE_NAMES=(trip-planner hotel-researcher flight-researcher)
 	REGISTRY_AGENT_UIDS=(
 		"${TRIP_PLANNER_REGISTRY_AGENT}"
 		"${FLIGHT_REGISTRY_AGENT}"
@@ -128,6 +126,39 @@ gcloud_adc() {
 	local token
 	token="$(adc_token)"
 	CLOUDSDK_AUTH_ACCESS_TOKEN="${token}" gcloud "$@"
+}
+
+check_exit_status() {
+	local -n _rc_ref=$1
+	shift
+	set +e
+	"$@"
+	_rc_ref=$?
+	set -e
+}
+
+fetch_aiplatform_json() {
+	local path="$1"
+	local -n _json_ref=$2
+	set +e
+	_json_ref="$(aiplatform_curl GET "${path}" 2>/dev/null)"
+	local rc=$?
+	set -e
+	if [[ ${rc} -ne 0 ]]; then
+		_json_ref='{}'
+	fi
+}
+
+fetch_registry_json() {
+	local path="$1"
+	local -n _json_ref=$2
+	set +e
+	_json_ref="$(registry_curl GET "${path}" 2>/dev/null)"
+	local rc=$?
+	set -e
+	if [[ ${rc} -ne 0 ]]; then
+		_json_ref='{}'
+	fi
 }
 
 run_or_dry() {
@@ -184,7 +215,7 @@ phase0_preflight() {
 	log "  project=${PROJECT} region=${REGION} numeric=${NUMERIC_PROJECT}"
 
 	local engines_json
-	engines_json="$(aiplatform_curl GET "reasoningEngines" 2>/dev/null || echo '{}')"
+	fetch_aiplatform_json "reasoningEngines" engines_json
 	local engine_count
 	engine_count="$(echo "${engines_json}" | jq '.reasoningEngines | length // 0')"
 	log "  reasoning engines listed: ${engine_count}"
@@ -198,8 +229,10 @@ phase0_preflight() {
 		fi
 	done
 
+	local rc
 	for uid in "${REGISTRY_AGENT_UIDS[@]}"; do
-		if registry_curl GET "agents/${uid}" >/dev/null 2>&1; then
+		check_exit_status rc registry_curl GET "agents/${uid}"
+		if [[ ${rc} -eq 0 ]]; then
 			log "  registry agent present: ${uid}"
 		else
 			log "  registry agent absent: ${uid}"
@@ -207,7 +240,7 @@ phase0_preflight() {
 	done
 
 	local services_json
-	services_json="$(registry_curl GET "services" 2>/dev/null || echo '{}')"
+	fetch_registry_json "services" services_json
 	for service_id in "${SERVICE_IDS[@]}"; do
 		if echo "${services_json}" | jq -e --arg id "${service_id}" \
 			'.services[]? | select(.name | endswith("/services/" + $id))' >/dev/null 2>&1; then
@@ -218,23 +251,26 @@ phase0_preflight() {
 	done
 
 	for gw_id in "${EGRESS_GATEWAY_ID}" "${INGRESS_GATEWAY_ID}"; do
-		if gcloud_adc alpha network-services agent-gateways describe "${gw_id}" \
-			--project="${PROJECT}" --location="${REGION}" >/dev/null 2>&1; then
+		check_exit_status rc gcloud_adc alpha network-services agent-gateways describe "${gw_id}" \
+			--project="${PROJECT}" --location="${REGION}"
+		if [[ ${rc} -eq 0 ]]; then
 			log "  gateway present: ${gw_id}"
 		else
 			log "  gateway absent: ${gw_id}"
 		fi
 	done
 
-	if gcloud_adc beta service-extensions authz-extensions describe "${AUTHZ_EXTENSION_ID}" \
-		--project="${PROJECT}" --location="${REGION}" >/dev/null 2>&1; then
+	check_exit_status rc gcloud_adc beta service-extensions authz-extensions describe "${AUTHZ_EXTENSION_ID}" \
+		--project="${PROJECT}" --location="${REGION}"
+	if [[ ${rc} -eq 0 ]]; then
 		log "  authz extension present: ${AUTHZ_EXTENSION_ID}"
 	else
 		log "  authz extension absent: ${AUTHZ_EXTENSION_ID}"
 	fi
 
-	if gcloud_adc alpha agent-identity connectors describe "${OAUTH_CONNECTOR_ID}" \
-		--project="${PROJECT}" --location="${REGION}" >/dev/null 2>&1; then
+	check_exit_status rc gcloud_adc alpha agent-identity connectors describe "${OAUTH_CONNECTOR_ID}" \
+		--project="${PROJECT}" --location="${REGION}"
+	if [[ ${rc} -eq 0 ]]; then
 		log "  oauth connector present: ${OAUTH_CONNECTOR_ID}"
 	else
 		log "  oauth connector absent: ${OAUTH_CONNECTOR_ID}"
@@ -252,7 +288,9 @@ phase0_preflight() {
 delete_reasoning_engine() {
 	local engine_id="$1"
 	local display_name="$2"
-	if aiplatform_curl GET "reasoningEngines/${engine_id}" >/dev/null 2>&1; then
+	local rc
+	check_exit_status rc aiplatform_curl GET "reasoningEngines/${engine_id}"
+	if [[ ${rc} -eq 0 ]]; then
 		run_or_dry "delete reasoning engine ${display_name} (${engine_id})" \
 			aiplatform_curl DELETE "reasoningEngines/${engine_id}?force=true"
 	else
@@ -268,28 +306,31 @@ phase1_delete_engines() {
 
 	if [[ ${INCLUDE_ORPHANS} == true ]]; then
 		log "  scanning for orphan engines (--include-orphans)"
-		local engines_json known_ids engine_id display_name
-		engines_json="$(aiplatform_curl GET "reasoningEngines" 2>/dev/null || echo '{}')"
+		local engines_json known_ids engine_id display_name engine_lines
+		fetch_aiplatform_json "reasoningEngines" engines_json
 		known_ids="$(printf '%s\n' "${ENGINE_IDS[@]}")"
+		engine_lines="$(echo "${engines_json}" | jq -r '.reasoningEngines[]? | "\(.name | split("/") | last)\t\(.displayName // "orphan")"')"
 		while IFS=$'\t' read -r engine_id display_name; do
 			[[ -z ${engine_id} ]] && continue
 			if echo "${known_ids}" | grep -qx "${engine_id}"; then
 				continue
 			fi
 			delete_reasoning_engine "${engine_id}" "${display_name:-orphan}"
-		done < <(echo "${engines_json}" | jq -r '.reasoningEngines[]? | "\(.name | split("/") | last)\t\(.displayName // "orphan")"')
+		done <<<"${engine_lines}"
 	fi
 }
 
 reset_iap_policy() {
 	local agent_uid="$1"
 	local label="$2"
-	if ! gcloud_adc beta iap web get-iam-policy \
+	local rc
+	check_exit_status rc gcloud_adc beta iap web get-iam-policy \
 		--project="${PROJECT}" \
 		--region="${REGION}" \
 		--resource-type=agent-registry \
 		--agent="${agent_uid}" \
-		--format=json >/dev/null 2>&1; then
+		--format=json
+	if [[ ${rc} -ne 0 ]]; then
 		log "  skip: no IAP policy on ${label} (${agent_uid})"
 		return 0
 	fi
@@ -317,7 +358,7 @@ phase2_clear_iap() {
 delete_registry_binding() {
 	local binding_id="$1"
 	local bindings_json
-	bindings_json="$(registry_curl GET "bindings" 2>/dev/null || echo '{}')"
+	fetch_registry_json "bindings" bindings_json
 	if echo "${bindings_json}" | jq -e --arg id "${binding_id}" \
 		'.bindings[]? | select(.name | endswith("/bindings/" + $id))' >/dev/null 2>&1; then
 		run_or_dry "delete registry binding ${binding_id}" \
@@ -329,7 +370,9 @@ delete_registry_binding() {
 
 delete_registry_service() {
 	local service_id="$1"
-	if registry_curl GET "services/${service_id}" >/dev/null 2>&1; then
+	local rc
+	check_exit_status rc registry_curl GET "services/${service_id}"
+	if [[ ${rc} -eq 0 ]]; then
 		run_or_dry "delete registry service ${service_id}" \
 			registry_curl DELETE "services/${service_id}"
 	else
@@ -339,7 +382,9 @@ delete_registry_service() {
 
 delete_registry_agent() {
 	local agent_uid="$1"
-	if registry_curl GET "agents/${agent_uid}" >/dev/null 2>&1; then
+	local rc
+	check_exit_status rc registry_curl GET "agents/${agent_uid}"
+	if [[ ${rc} -eq 0 ]]; then
 		run_or_dry "delete registry agent ${agent_uid}" \
 			registry_curl DELETE "agents/${agent_uid}"
 	else
@@ -364,9 +409,13 @@ delete_if_exists() {
 	local resource_type="$1"
 	local resource_id="$2"
 	local describe_cmd="$3"
-	local delete_cmd_name="$4"
-	shift 4
-	if eval "${describe_cmd}" >/dev/null 2>&1; then
+	shift 3
+	local rc
+	set +e
+	eval "${describe_cmd}" >/dev/null 2>&1
+	rc=$?
+	set -e
+	if [[ ${rc} -eq 0 ]]; then
 		run_or_dry "delete ${resource_type} ${resource_id}" "$@"
 	else
 		log "  skip: ${resource_type} ${resource_id} not found"
@@ -377,19 +426,16 @@ phase4_delete_gateways() {
 	log "Phase 4: delete authz extension and Agent Gateways"
 	delete_if_exists "authz extension" "${AUTHZ_EXTENSION_ID}" \
 		"gcloud_adc beta service-extensions authz-extensions describe ${AUTHZ_EXTENSION_ID} --project=${PROJECT} --location=${REGION}" \
-		authz-extension \
 		gcloud_adc beta service-extensions authz-extensions delete "${AUTHZ_EXTENSION_ID}" \
 		--project="${PROJECT}" --location="${REGION}" --quiet
 
 	delete_if_exists "egress gateway" "${EGRESS_GATEWAY_ID}" \
 		"gcloud_adc alpha network-services agent-gateways describe ${EGRESS_GATEWAY_ID} --project=${PROJECT} --location=${REGION}" \
-		gateway \
 		gcloud_adc alpha network-services agent-gateways delete "${EGRESS_GATEWAY_ID}" \
 		--project="${PROJECT}" --location="${REGION}" --quiet
 
 	delete_if_exists "ingress gateway" "${INGRESS_GATEWAY_ID}" \
 		"gcloud_adc alpha network-services agent-gateways describe ${INGRESS_GATEWAY_ID} --project=${PROJECT} --location=${REGION}" \
-		gateway \
 		gcloud_adc alpha network-services agent-gateways delete "${INGRESS_GATEWAY_ID}" \
 		--project="${PROJECT}" --location="${REGION}" --quiet
 }
@@ -398,7 +444,6 @@ phase5_delete_oauth() {
 	log "Phase 5: delete OAuth connector (if exists)"
 	delete_if_exists "oauth connector" "${OAUTH_CONNECTOR_ID}" \
 		"gcloud_adc alpha agent-identity connectors describe ${OAUTH_CONNECTOR_ID} --project=${PROJECT} --location=${REGION}" \
-		connector \
 		gcloud_adc alpha agent-identity connectors delete "${OAUTH_CONNECTOR_ID}" \
 		--project="${PROJECT}" --location="${REGION}" --quiet
 }
@@ -436,7 +481,7 @@ phase7_verify() {
 	local failures=0
 
 	local engines_json engine_count
-	engines_json="$(aiplatform_curl GET "reasoningEngines" 2>/dev/null || echo '{}')"
+	fetch_aiplatform_json "reasoningEngines" engines_json
 	engine_count="$(echo "${engines_json}" | jq '.reasoningEngines | length // 0')"
 	if [[ ${engine_count} -eq 0 ]]; then
 		log "  ok: no reasoning engines"
@@ -445,16 +490,19 @@ phase7_verify() {
 		failures=$((failures + 1))
 	fi
 
+	local rc
 	for gw_id in "${EGRESS_GATEWAY_ID}" "${INGRESS_GATEWAY_ID}"; do
-		if gcloud_adc alpha network-services agent-gateways describe "${gw_id}" \
-			--project="${PROJECT}" --location="${REGION}" >/dev/null 2>&1; then
+		check_exit_status rc gcloud_adc alpha network-services agent-gateways describe "${gw_id}" \
+			--project="${PROJECT}" --location="${REGION}"
+		if [[ ${rc} -eq 0 ]]; then
 			warn "gateway still present: ${gw_id}"
 			failures=$((failures + 1))
 		fi
 	done
 
 	for service_id in "${SERVICE_IDS[@]}"; do
-		if registry_curl GET "services/${service_id}" >/dev/null 2>&1; then
+		check_exit_status rc registry_curl GET "services/${service_id}"
+		if [[ ${rc} -eq 0 ]]; then
 			warn "registry service still present: ${service_id}"
 			failures=$((failures + 1))
 		fi
@@ -495,8 +543,12 @@ main() {
 	phase4_delete_gateways
 	phase5_delete_oauth
 	phase6_terraform_destroy
+	local rc
 	if [[ ${DRY_RUN} == false ]]; then
-		phase7_verify || true
+		check_exit_status rc phase7_verify
+		if [[ ${rc} -ne 0 ]]; then
+			:
+		fi
 	fi
 	log "done"
 }

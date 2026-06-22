@@ -29,7 +29,7 @@ Junior engineers often mix these up. They are **different objects** for **differ
 | **Engine ID**          | `${TRIP_PLANNER_ENGINE_ID}` (trip-planner)           | The **numeric ID** Google assigns to that Reasoning Engine. | `agents-cli run --url`, A2A URLs, updating bundled AgentCards  |
 | **Registry agent UID** | `agentregistry-00000000-0000-0000-951b-1e5d969e3b7b` | A **governance catalog entry** for the same logical agent.  | IAP policies, ingress bindings, registry services—not deploy   |
 
-**Rule of thumb:** Deploy and debug runtime with **engine IDs**. Govern access with **registry UIDs** from [`terraform/registry/mesh-agents.env`](../../terraform/registry/mesh-agents.env). Guide [04 — Mesh governance](04-mesh-governance.md) covers registry and IAP.
+**Rule of thumb:** Deploy and debug runtime with **engine IDs**. Govern access with **registry UIDs** from [`terraform/registry/mesh-agents.env`](../../terraform/registry/mesh-agents.env.example). Guide [04 — Mesh governance](04-mesh-governance.md) covers registry and IAP.
 
 ```mermaid
 flowchart LR
@@ -147,7 +147,7 @@ flowchart TD
 | hotel-researcher  | `${HOTEL_ENGINE_ID}`        | `--agent-identity`                      | Platform agent identity |
 | trip-planner      | `${TRIP_PLANNER_ENGINE_ID}` | `--service-account trip-planner-sa@...` | `trip-planner-sa`       |
 
-Registry UID for trip-planner (governance, not deploy): `TRIP_PLANNER_REGISTRY_AGENT=agentregistry-00000000-0000-0000-951b-1e5d969e3b7b` in [`mesh-agents.env`](../../terraform/registry/mesh-agents.env).
+Registry UID for trip-planner (governance, not deploy): `TRIP_PLANNER_REGISTRY_AGENT=agentregistry-00000000-0000-0000-951b-1e5d969e3b7b` in [`mesh-agents.env`](../../terraform/registry/mesh-agents.env.example).
 
 ### Why leaf-first deploy order?
 
@@ -356,7 +356,7 @@ agents-cli run --url \
 | ---------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Console playground     | [trip-planner playground](https://console.cloud.google.com/vertex-ai/agents/agent-engines/locations/asia-northeast1/agent-engines/${TRIP_PLANNER_ENGINE_ID}/playground?project=<your-gcp-project>) loads |
 | Smoke run              | Response mentions both flights and hotels                                                                                                                                                                |
-| Engine IDs in env file | Match live engines in [`mesh-agents.env`](../../terraform/registry/mesh-agents.env)                                                                                                                      |
+| Engine IDs in env file | Match live engines in [`mesh-agents.env`](../../terraform/registry/mesh-agents.env.example)                                                                                                              |
 | Cloud Trace            | Spans show trip-planner → specialist A2A delegation                                                                                                                                                      |
 
 ```bash

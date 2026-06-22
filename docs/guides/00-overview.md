@@ -294,7 +294,7 @@ Authorization is evaluated **per agent**, not only at the entry point. Full matr
 
 ## Terraform and ops
 
-Platform service accounts and IAM templates: [`terraform/`](../../terraform/main.tf). Deploy operations impersonate **`agent-operator-sa`**. Registry IDs: [`terraform/registry/mesh-agents.env`](../../terraform/registry/mesh-agents.env).
+Platform service accounts and IAM templates: [`terraform/`](../../terraform/main.tf). Deploy operations impersonate **`agent-operator-sa`**. Registry IDs: [`terraform/registry/mesh-agents.env`](../../terraform/registry/mesh-agents.env.example).
 
 | Script                                           | Purpose                          |
 | ------------------------------------------------ | -------------------------------- |

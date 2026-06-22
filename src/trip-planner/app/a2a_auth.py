@@ -11,6 +11,7 @@ from __future__ import annotations
 import google.auth
 import google.auth.transport.requests
 import httpx
+from google.auth import credentials as auth_credentials
 
 DEFAULT_A2A_TIMEOUT = 600.0
 
@@ -19,14 +20,18 @@ class GoogleCloudAuth(httpx.Auth):
     """Auto-refreshing Google Cloud authentication for httpx AsyncClient."""
 
     def __init__(self) -> None:
-        self._credentials: google.auth.credentials.Credentials | None = None
+        self._credentials: auth_credentials.Credentials | None = None
 
-    def _credentials_or_raise(self) -> google.auth.credentials.Credentials:
-        if self._credentials is None:
-            self._credentials, _ = google.auth.default(
-                scopes=["https://www.googleapis.com/auth/cloud-platform"]
-            )
-        return self._credentials
+    def _credentials_or_raise(self) -> auth_credentials.Credentials:
+        if self._credentials is not None:
+            return self._credentials
+        loaded, _ = google.auth.default(
+            scopes=["https://www.googleapis.com/auth/cloud-platform"]
+        )
+        if loaded is None:
+            raise RuntimeError("application default credentials unavailable")
+        self._credentials = loaded
+        return loaded
 
     def auth_flow(self, request: httpx.Request):
         credentials = self._credentials_or_raise()

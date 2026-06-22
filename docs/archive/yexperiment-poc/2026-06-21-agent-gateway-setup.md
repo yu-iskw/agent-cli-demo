@@ -40,4 +40,4 @@ export OAUTH_CLIENT_SECRET=...
 ./terraform/scripts/setup_agent_gateway.sh --with-oauth --apply-governance
 ```
 
-Guide: [`docs/guides/05-gateway-policy-demo.md`](../guides/05-gateway-policy-demo.md)
+Guide: [`docs/guides/05-gateway-policy-demo.md`](../../guides/05-gateway-policy-demo.md)

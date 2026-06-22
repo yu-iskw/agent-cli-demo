@@ -16,6 +16,7 @@
 import os
 
 import google.auth
+import google.auth.exceptions
 from google.adk.agents import Agent, SequentialAgent
 from google.adk.agents.remote_a2a_agent import RemoteA2aAgent
 from google.adk.apps import App

@@ -18,11 +18,11 @@ if [[ ${1-} == "--json" ]]; then
 	JSON_MODE=true
 fi
 
-# shellcheck disable=SC1090
 if [[ ! -f ${ENV_FILE} ]]; then
 	echo "error: missing ${ENV_FILE}; run ./terraform/scripts/discover_mesh.sh after deploy" >&2
 	exit 1
 fi
+# shellcheck disable=SC1090
 source "${ENV_FILE}"
 
 # shellcheck disable=SC1091

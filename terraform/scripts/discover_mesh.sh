@@ -15,8 +15,6 @@ ENV_FILE="${REPO_ROOT}/terraform/registry/mesh-agents.env"
 APP_CARDS_DIR="${REPO_ROOT}/src/trip-planner/app/cards"
 REGISTRY_CARDS_DIR="${REPO_ROOT}/terraform/registry/cards"
 
-MESH_DISPLAY_NAMES=(trip-planner hotel-researcher flight-researcher)
-
 log() {
 	echo "[discover-mesh] $*"
 }

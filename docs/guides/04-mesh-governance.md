@@ -30,7 +30,7 @@ Three names, one trip-planner—do not swap them in commands.
 | **Engine ID**          | `${TRIP_PLANNER_ENGINE_ID}`                          | Numeric ID in deploy URLs, playground, `agents-cli run --url`. |
 | **Registry agent UID** | `agentregistry-00000000-0000-0000-951b-1e5d969e3b7b` | Catalog ID for governance: IAP, ingress, bindings.             |
 
-**IAP always uses the registry UID** with `--resource-type=agent-registry` and values from [`terraform/registry/mesh-agents.env`](../../terraform/registry/mesh-agents.env). Passing an engine ID to `--agent=` will fail or target the wrong resource.
+**IAP always uses the registry UID** with `--resource-type=agent-registry` and values from [`terraform/registry/mesh-agents.env`](../../terraform/registry/mesh-agents.env.example). Passing an engine ID to `--agent=` will fail or target the wrong resource.
 
 All three mesh agents (live engine IDs):
 
