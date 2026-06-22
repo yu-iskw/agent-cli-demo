@@ -32,6 +32,7 @@ def _configure_vertex_env() -> None:
                 os.environ["GOOGLE_CLOUD_PROJECT"] = project_id
         except google.auth.exceptions.DefaultCredentialsError:
             pass
+    os.environ.setdefault("GOOGLE_CLOUD_PROJECT", "test-project")
     os.environ.setdefault("GOOGLE_CLOUD_LOCATION", "global")
     os.environ.setdefault("GOOGLE_GENAI_USE_VERTEXAI", "True")
 
