@@ -6,6 +6,9 @@ on:
       - .github/workflows/test.yml
       - pyproject.toml
       - src/your_package/**/*.py
+      - src/*/pyproject.toml
+      - src/*/app/**
+      - src/*/tests/**
       - pylintrc
       - mise.toml
       - mise.lock

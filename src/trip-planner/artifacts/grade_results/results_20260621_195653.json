@@ -1,0 +1,753 @@
+{
+  "eval_case_results": [
+    {
+      "eval_case_index": 0,
+      "response_candidate_results": [
+        {
+          "response_index": 0,
+          "metric_results": {
+            "custom_response_quality": {
+              "metric_name": "custom_response_quality",
+              "score": 5.0,
+              "explanation": "The agent successfully identified the need to search for both flights and hotels based on the user's prompt. It correctly called `delegate_flight_search` with 'NYC' and 'San Francisco' as origin and destination, respectively, and `delegate_hotel_search` with 'San Francisco' as the city. The information retrieved from both tool calls (airline, route, price for flight; hotel name, nightly price for hotel) is accurately and clearly presented in the final response. The response is concise, well-structured, and directly answers all aspects of the user's request, demonstrating excellent execution of the plan.",
+              "rubric_verdicts": null,
+              "raw_output": null,
+              "error_message": null
+            }
+          }
+        }
+      ]
+    },
+    {
+      "eval_case_index": 1,
+      "response_candidate_results": [
+        {
+          "response_index": 0,
+          "metric_results": {
+            "custom_response_quality": {
+              "metric_name": "custom_response_quality",
+              "score": 5.0,
+              "explanation": "The agent successfully identified the need to search for both flights and hotels. It correctly extracted the origin (NYC) and destination (San Francisco) cities for the flight search, and the destination city (San Francisco) for the hotel search. Both `delegate_flight_search` and `delegate_hotel_search` tools were called and returned valid results. The final response synthesizes this information clearly, concisely, and accurately, providing the requested flight and hotel details in a well-structured format. The user persona `mesh-flight-user` seems to have correctly allowed access to `Mesh Air` flights and `Mesh Downtown Hotel`.",
+              "rubric_verdicts": null,
+              "raw_output": null,
+              "error_message": null
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "summary_metrics": [
+    {
+      "metric_name": "custom_response_quality",
+      "num_cases_total": 2,
+      "num_cases_valid": 2,
+      "num_cases_error": 0,
+      "mean_score": 5.0,
+      "stdev_score": 0.0,
+      "pass_rate": null
+    }
+  ],
+  "win_rates": null,
+  "evaluation_dataset": [
+    {
+      "bigquery_source": null,
+      "gcs_source": null,
+      "eval_cases": [
+        {
+          "prompt": {
+            "parts": [
+              {
+                "media_resolution": null,
+                "code_execution_result": null,
+                "executable_code": null,
+                "file_data": null,
+                "function_call": null,
+                "function_response": null,
+                "inline_data": null,
+                "text": "Plan a trip from NYC to San Francisco. Include flights and hotels.",
+                "thought": null,
+                "thought_signature": null,
+                "video_metadata": null,
+                "tool_call": null,
+                "tool_response": null,
+                "part_metadata": null
+              }
+            ],
+            "role": "user"
+          },
+          "responses": [
+            {
+              "response": {
+                "parts": [
+                  {
+                    "media_resolution": null,
+                    "code_execution_result": null,
+                    "executable_code": null,
+                    "file_data": null,
+                    "function_call": null,
+                    "function_response": null,
+                    "inline_data": null,
+                    "text": "Here is your concise trip plan from NYC to San Francisco, including flight and hotel options:\n\n### Flights\n\n*   **Airline:** Mesh Air\n*   **Route:** NYC to SAN FRANCISCO\n*   **Price:** $320\n\n### Hotels in San Francisco\n\n*   **Hotel:** Mesh Downtown Hotel\n*   **Nightly Price:** $189",
+                    "thought": null,
+                    "thought_signature": null,
+                    "video_metadata": null,
+                    "tool_call": null,
+                    "tool_response": null,
+                    "part_metadata": null
+                  }
+                ],
+                "role": "model"
+              }
+            }
+          ],
+          "reference": null,
+          "system_instruction": null,
+          "conversation_history": null,
+          "rubric_groups": null,
+          "eval_case_id": "trip_nyc_sfo",
+          "intermediate_events": null,
+          "agent_info": null,
+          "agent_data": {
+            "agents": {
+              "root_agent": {
+                "agent_id": "root_agent",
+                "agent_type": "LlmAgent",
+                "description": "Orchestrates trip planning by delegating to flight and hotel specialists.",
+                "instruction": "You are the trip-planner orchestrator. For trips, call delegate_flight_search and delegate_hotel_search. If a tool returns auth_denied, explain the AUTH_ERROR to the user and continue with permitted sections only. If mesh_auth_denied is set in state, respond with that message. Produce a concise trip plan with flights and hotels when allowed.",
+                "tools": [
+                  {
+                    "retrieval": null,
+                    "computer_use": null,
+                    "file_search": null,
+                    "google_search": null,
+                    "google_maps": null,
+                    "code_execution": null,
+                    "enterprise_web_search": null,
+                    "function_declarations": [
+                      {
+                        "description": "Delegate flight search to the flight-researcher specialist.\n\nArgs:\n    origin: Departure city (e.g. NYC).\n    destination: Arrival city (e.g. San Francisco).\n\nReturns:\n    Flight options or AUTH_ERROR when persona lacks permission.",
+                        "name": "delegate_flight_search",
+                        "parameters": null,
+                        "parameters_json_schema": {
+                          "properties": {
+                            "origin": {
+                              "title": "Origin",
+                              "type": "string"
+                            },
+                            "destination": {
+                              "title": "Destination",
+                              "type": "string"
+                            }
+                          },
+                          "required": ["origin", "destination"],
+                          "title": "delegate_flight_searchParams",
+                          "type": "object"
+                        },
+                        "response": null,
+                        "response_json_schema": {
+                          "additionalProperties": true,
+                          "type": "object"
+                        },
+                        "behavior": null
+                      }
+                    ],
+                    "google_search_retrieval": null,
+                    "parallel_ai_search": null,
+                    "url_context": null,
+                    "mcp_servers": null
+                  },
+                  {
+                    "retrieval": null,
+                    "computer_use": null,
+                    "file_search": null,
+                    "google_search": null,
+                    "google_maps": null,
+                    "code_execution": null,
+                    "enterprise_web_search": null,
+                    "function_declarations": [
+                      {
+                        "description": "Delegate hotel search to the hotel-researcher specialist.\n\nArgs:\n    city: Destination city for lodging.\n\nReturns:\n    Hotel options or AUTH_ERROR when persona lacks permission.",
+                        "name": "delegate_hotel_search",
+                        "parameters": null,
+                        "parameters_json_schema": {
+                          "properties": {
+                            "city": {
+                              "title": "City",
+                              "type": "string"
+                            }
+                          },
+                          "required": ["city"],
+                          "title": "delegate_hotel_searchParams",
+                          "type": "object"
+                        },
+                        "response": null,
+                        "response_json_schema": {
+                          "additionalProperties": true,
+                          "type": "object"
+                        },
+                        "behavior": null
+                      }
+                    ],
+                    "google_search_retrieval": null,
+                    "parallel_ai_search": null,
+                    "url_context": null,
+                    "mcp_servers": null
+                  }
+                ],
+                "sub_agents": []
+              }
+            },
+            "turns": [
+              {
+                "turn_index": 0,
+                "turn_id": "turn_0",
+                "events": [
+                  {
+                    "author": "root_agent",
+                    "content": {
+                      "parts": [
+                        {
+                          "media_resolution": null,
+                          "code_execution_result": null,
+                          "executable_code": null,
+                          "file_data": null,
+                          "function_call": {
+                            "id": "adk-40f18766-2a0a-491f-8f9e-88a2f92c3757",
+                            "args": {
+                              "origin": "NYC",
+                              "destination": "San Francisco"
+                            },
+                            "name": "delegate_flight_search",
+                            "partial_args": null,
+                            "will_continue": null
+                          },
+                          "function_response": null,
+                          "inline_data": null,
+                          "text": null,
+                          "thought": null,
+                          "thought_signature": null,
+                          "video_metadata": null,
+                          "tool_call": null,
+                          "tool_response": null,
+                          "part_metadata": null
+                        }
+                      ],
+                      "role": "model"
+                    },
+                    "event_time": null,
+                    "state_delta": null,
+                    "active_tools": null
+                  },
+                  {
+                    "author": "root_agent",
+                    "content": {
+                      "parts": [
+                        {
+                          "media_resolution": null,
+                          "code_execution_result": null,
+                          "executable_code": null,
+                          "file_data": null,
+                          "function_call": null,
+                          "function_response": {
+                            "will_continue": null,
+                            "scheduling": null,
+                            "parts": null,
+                            "id": "adk-40f18766-2a0a-491f-8f9e-88a2f92c3757",
+                            "name": "delegate_flight_search",
+                            "response": {
+                              "status": "ok",
+                              "source": "mock_delegate",
+                              "flights": [
+                                {
+                                  "airline": "Mesh Air",
+                                  "origin": "NYC",
+                                  "destination": "SAN FRANCISCO",
+                                  "price_usd": 320
+                                }
+                              ]
+                            }
+                          },
+                          "inline_data": null,
+                          "text": null,
+                          "thought": null,
+                          "thought_signature": null,
+                          "video_metadata": null,
+                          "tool_call": null,
+                          "tool_response": null,
+                          "part_metadata": null
+                        }
+                      ],
+                      "role": "user"
+                    },
+                    "event_time": null,
+                    "state_delta": null,
+                    "active_tools": null
+                  },
+                  {
+                    "author": "root_agent",
+                    "content": {
+                      "parts": [
+                        {
+                          "media_resolution": null,
+                          "code_execution_result": null,
+                          "executable_code": null,
+                          "file_data": null,
+                          "function_call": {
+                            "id": "adk-cabc429f-cc92-4f60-94ac-de881df08036",
+                            "args": {
+                              "city": "San Francisco"
+                            },
+                            "name": "delegate_hotel_search",
+                            "partial_args": null,
+                            "will_continue": null
+                          },
+                          "function_response": null,
+                          "inline_data": null,
+                          "text": null,
+                          "thought": null,
+                          "thought_signature": null,
+                          "video_metadata": null,
+                          "tool_call": null,
+                          "tool_response": null,
+                          "part_metadata": null
+                        }
+                      ],
+                      "role": "model"
+                    },
+                    "event_time": null,
+                    "state_delta": null,
+                    "active_tools": null
+                  },
+                  {
+                    "author": "root_agent",
+                    "content": {
+                      "parts": [
+                        {
+                          "media_resolution": null,
+                          "code_execution_result": null,
+                          "executable_code": null,
+                          "file_data": null,
+                          "function_call": null,
+                          "function_response": {
+                            "will_continue": null,
+                            "scheduling": null,
+                            "parts": null,
+                            "id": "adk-cabc429f-cc92-4f60-94ac-de881df08036",
+                            "name": "delegate_hotel_search",
+                            "response": {
+                              "status": "ok",
+                              "source": "mock_delegate",
+                              "hotels": [
+                                {
+                                  "name": "Mesh Downtown Hotel",
+                                  "city": "San Francisco",
+                                  "nightly_usd": 189
+                                }
+                              ]
+                            }
+                          },
+                          "inline_data": null,
+                          "text": null,
+                          "thought": null,
+                          "thought_signature": null,
+                          "video_metadata": null,
+                          "tool_call": null,
+                          "tool_response": null,
+                          "part_metadata": null
+                        }
+                      ],
+                      "role": "user"
+                    },
+                    "event_time": null,
+                    "state_delta": null,
+                    "active_tools": null
+                  },
+                  {
+                    "author": "root_agent",
+                    "content": {
+                      "parts": [
+                        {
+                          "media_resolution": null,
+                          "code_execution_result": null,
+                          "executable_code": null,
+                          "file_data": null,
+                          "function_call": null,
+                          "function_response": null,
+                          "inline_data": null,
+                          "text": "Here is your concise trip plan from NYC to San Francisco, including flight and hotel options:\n\n### Flights\n\n*   **Airline:** Mesh Air\n*   **Route:** NYC to SAN FRANCISCO\n*   **Price:** $320\n\n### Hotels in San Francisco\n\n*   **Hotel:** Mesh Downtown Hotel\n*   **Nightly Price:** $189",
+                          "thought": null,
+                          "thought_signature": null,
+                          "video_metadata": null,
+                          "tool_call": null,
+                          "tool_response": null,
+                          "part_metadata": null
+                        }
+                      ],
+                      "role": "model"
+                    },
+                    "event_time": null,
+                    "state_delta": null,
+                    "active_tools": null
+                  }
+                ]
+              }
+            ]
+          },
+          "user_scenario": null
+        },
+        {
+          "prompt": {
+            "parts": [
+              {
+                "media_resolution": null,
+                "code_execution_result": null,
+                "executable_code": null,
+                "file_data": null,
+                "function_call": null,
+                "function_response": null,
+                "inline_data": null,
+                "text": "Plan NYC to San Francisco with flights and hotels. User persona is mesh-flight-user.",
+                "thought": null,
+                "thought_signature": null,
+                "video_metadata": null,
+                "tool_call": null,
+                "tool_response": null,
+                "part_metadata": null
+              }
+            ],
+            "role": "user"
+          },
+          "responses": [
+            {
+              "response": {
+                "parts": [
+                  {
+                    "media_resolution": null,
+                    "code_execution_result": null,
+                    "executable_code": null,
+                    "file_data": null,
+                    "function_call": null,
+                    "function_response": null,
+                    "inline_data": null,
+                    "text": "Here is your trip plan from NYC to San Francisco:\n\n**Flights:**\n\n*   **Airline:** Mesh Air\n*   **Price:** $320\n\n**Hotels in San Francisco:**\n\n*   **Hotel:** Mesh Downtown Hotel\n*   **Nightly Price:** $189",
+                    "thought": null,
+                    "thought_signature": null,
+                    "video_metadata": null,
+                    "tool_call": null,
+                    "tool_response": null,
+                    "part_metadata": null
+                  }
+                ],
+                "role": "model"
+              }
+            }
+          ],
+          "reference": null,
+          "system_instruction": null,
+          "conversation_history": null,
+          "rubric_groups": null,
+          "eval_case_id": "trip_flight_only_persona",
+          "intermediate_events": null,
+          "agent_info": null,
+          "agent_data": {
+            "agents": {
+              "root_agent": {
+                "agent_id": "root_agent",
+                "agent_type": "LlmAgent",
+                "description": "Orchestrates trip planning by delegating to flight and hotel specialists.",
+                "instruction": "You are the trip-planner orchestrator. For trips, call delegate_flight_search and delegate_hotel_search. If a tool returns auth_denied, explain the AUTH_ERROR to the user and continue with permitted sections only. If mesh_auth_denied is set in state, respond with that message. Produce a concise trip plan with flights and hotels when allowed.",
+                "tools": [
+                  {
+                    "retrieval": null,
+                    "computer_use": null,
+                    "file_search": null,
+                    "google_search": null,
+                    "google_maps": null,
+                    "code_execution": null,
+                    "enterprise_web_search": null,
+                    "function_declarations": [
+                      {
+                        "description": "Delegate flight search to the flight-researcher specialist.\n\nArgs:\n    origin: Departure city (e.g. NYC).\n    destination: Arrival city (e.g. San Francisco).\n\nReturns:\n    Flight options or AUTH_ERROR when persona lacks permission.",
+                        "name": "delegate_flight_search",
+                        "parameters": null,
+                        "parameters_json_schema": {
+                          "properties": {
+                            "origin": {
+                              "title": "Origin",
+                              "type": "string"
+                            },
+                            "destination": {
+                              "title": "Destination",
+                              "type": "string"
+                            }
+                          },
+                          "required": ["origin", "destination"],
+                          "title": "delegate_flight_searchParams",
+                          "type": "object"
+                        },
+                        "response": null,
+                        "response_json_schema": {
+                          "additionalProperties": true,
+                          "type": "object"
+                        },
+                        "behavior": null
+                      }
+                    ],
+                    "google_search_retrieval": null,
+                    "parallel_ai_search": null,
+                    "url_context": null,
+                    "mcp_servers": null
+                  },
+                  {
+                    "retrieval": null,
+                    "computer_use": null,
+                    "file_search": null,
+                    "google_search": null,
+                    "google_maps": null,
+                    "code_execution": null,
+                    "enterprise_web_search": null,
+                    "function_declarations": [
+                      {
+                        "description": "Delegate hotel search to the hotel-researcher specialist.\n\nArgs:\n    city: Destination city for lodging.\n\nReturns:\n    Hotel options or AUTH_ERROR when persona lacks permission.",
+                        "name": "delegate_hotel_search",
+                        "parameters": null,
+                        "parameters_json_schema": {
+                          "properties": {
+                            "city": {
+                              "title": "City",
+                              "type": "string"
+                            }
+                          },
+                          "required": ["city"],
+                          "title": "delegate_hotel_searchParams",
+                          "type": "object"
+                        },
+                        "response": null,
+                        "response_json_schema": {
+                          "additionalProperties": true,
+                          "type": "object"
+                        },
+                        "behavior": null
+                      }
+                    ],
+                    "google_search_retrieval": null,
+                    "parallel_ai_search": null,
+                    "url_context": null,
+                    "mcp_servers": null
+                  }
+                ],
+                "sub_agents": []
+              }
+            },
+            "turns": [
+              {
+                "turn_index": 0,
+                "turn_id": "turn_0",
+                "events": [
+                  {
+                    "author": "root_agent",
+                    "content": {
+                      "parts": [
+                        {
+                          "media_resolution": null,
+                          "code_execution_result": null,
+                          "executable_code": null,
+                          "file_data": null,
+                          "function_call": {
+                            "id": "adk-8f677832-4bc3-4504-92a2-bdc8570c9a3f",
+                            "args": {
+                              "origin": "NYC",
+                              "destination": "San Francisco"
+                            },
+                            "name": "delegate_flight_search",
+                            "partial_args": null,
+                            "will_continue": null
+                          },
+                          "function_response": null,
+                          "inline_data": null,
+                          "text": null,
+                          "thought": null,
+                          "thought_signature": null,
+                          "video_metadata": null,
+                          "tool_call": null,
+                          "tool_response": null,
+                          "part_metadata": null
+                        },
+                        {
+                          "media_resolution": null,
+                          "code_execution_result": null,
+                          "executable_code": null,
+                          "file_data": null,
+                          "function_call": {
+                            "id": "adk-61f7a944-5a78-4b4f-bb41-cebbba993230",
+                            "args": {
+                              "city": "San Francisco"
+                            },
+                            "name": "delegate_hotel_search",
+                            "partial_args": null,
+                            "will_continue": null
+                          },
+                          "function_response": null,
+                          "inline_data": null,
+                          "text": null,
+                          "thought": null,
+                          "thought_signature": null,
+                          "video_metadata": null,
+                          "tool_call": null,
+                          "tool_response": null,
+                          "part_metadata": null
+                        }
+                      ],
+                      "role": "model"
+                    },
+                    "event_time": null,
+                    "state_delta": null,
+                    "active_tools": null
+                  },
+                  {
+                    "author": "root_agent",
+                    "content": {
+                      "parts": [
+                        {
+                          "media_resolution": null,
+                          "code_execution_result": null,
+                          "executable_code": null,
+                          "file_data": null,
+                          "function_call": null,
+                          "function_response": {
+                            "will_continue": null,
+                            "scheduling": null,
+                            "parts": null,
+                            "id": "adk-8f677832-4bc3-4504-92a2-bdc8570c9a3f",
+                            "name": "delegate_flight_search",
+                            "response": {
+                              "status": "ok",
+                              "source": "mock_delegate",
+                              "flights": [
+                                {
+                                  "airline": "Mesh Air",
+                                  "origin": "NYC",
+                                  "destination": "SAN FRANCISCO",
+                                  "price_usd": 320
+                                }
+                              ]
+                            }
+                          },
+                          "inline_data": null,
+                          "text": null,
+                          "thought": null,
+                          "thought_signature": null,
+                          "video_metadata": null,
+                          "tool_call": null,
+                          "tool_response": null,
+                          "part_metadata": null
+                        },
+                        {
+                          "media_resolution": null,
+                          "code_execution_result": null,
+                          "executable_code": null,
+                          "file_data": null,
+                          "function_call": null,
+                          "function_response": {
+                            "will_continue": null,
+                            "scheduling": null,
+                            "parts": null,
+                            "id": "adk-61f7a944-5a78-4b4f-bb41-cebbba993230",
+                            "name": "delegate_hotel_search",
+                            "response": {
+                              "status": "ok",
+                              "source": "mock_delegate",
+                              "hotels": [
+                                {
+                                  "name": "Mesh Downtown Hotel",
+                                  "city": "San Francisco",
+                                  "nightly_usd": 189
+                                }
+                              ]
+                            }
+                          },
+                          "inline_data": null,
+                          "text": null,
+                          "thought": null,
+                          "thought_signature": null,
+                          "video_metadata": null,
+                          "tool_call": null,
+                          "tool_response": null,
+                          "part_metadata": null
+                        }
+                      ],
+                      "role": "user"
+                    },
+                    "event_time": null,
+                    "state_delta": null,
+                    "active_tools": null
+                  },
+                  {
+                    "author": "root_agent",
+                    "content": {
+                      "parts": [
+                        {
+                          "media_resolution": null,
+                          "code_execution_result": null,
+                          "executable_code": null,
+                          "file_data": null,
+                          "function_call": null,
+                          "function_response": null,
+                          "inline_data": null,
+                          "text": "Here is your trip plan from NYC to San Francisco:\n\n**Flights:**\n\n*   **Airline:** Mesh Air\n*   **Price:** $320\n\n**Hotels in San Francisco:**\n\n*   **Hotel:** Mesh Downtown Hotel\n*   **Nightly Price:** $189",
+                          "thought": null,
+                          "thought_signature": null,
+                          "video_metadata": null,
+                          "tool_call": null,
+                          "tool_response": null,
+                          "part_metadata": null
+                        }
+                      ],
+                      "role": "model"
+                    },
+                    "event_time": null,
+                    "state_delta": null,
+                    "active_tools": null
+                  }
+                ]
+              }
+            ]
+          },
+          "user_scenario": null
+        }
+      ],
+      "eval_dataset_df": null,
+      "candidate_name": null
+    }
+  ],
+  "metadata": {
+    "candidate_names": ["candidate_1"],
+    "dataset_name": null,
+    "dataset_id": null,
+    "creation_timestamp": "2026-06-21T10:56:53.116850Z",
+    "dataset": [
+      {
+        "prompt_display_text": "Plan a trip from NYC to San Francisco. Include flights and hotels.",
+        "prompt_raw_json": "{\n  \"parts\": [\n    {\n      \"text\": \"Plan a trip from NYC to San Francisco. Include flights and hotels.\"\n    }\n  ],\n  \"role\": \"user\"\n}",
+        "reference": "",
+        "reference_raw_json": "",
+        "response_display_text": "Here is your concise trip plan from NYC to San Francisco, including flight and hotel options:\n\n### Flights\n\n*   **Airline:** Mesh Air\n*   **Route:** NYC to SAN FRANCISCO\n*   **Price:** $320\n\n### Hotels in San Francisco\n\n*   **Hotel:** Mesh Downtown Hotel\n*   **Nightly Price:** $189",
+        "response_raw_json": "{\n  \"parts\": [\n    {\n      \"text\": \"Here is your concise trip plan from NYC to San Francisco, including flight and hotel options:\\n\\n### Flights\\n\\n*   **Airline:** Mesh Air\\n*   **Route:** NYC to SAN FRANCISCO\\n*   **Price:** $320\\n\\n### Hotels in San Francisco\\n\\n*   **Hotel:** Mesh Downtown Hotel\\n*   **Nightly Price:** $189\"\n    }\n  ],\n  \"role\": \"model\"\n}",
+        "intermediate_events": null,
+        "agent_data": "{\"agents\": {\"root_agent\": {\"agent_id\": \"root_agent\", \"agent_type\": \"LlmAgent\", \"description\": \"Orchestrates trip planning by delegating to flight and hotel specialists.\", \"instruction\": \"You are the trip-planner orchestrator. For trips, call delegate_flight_search and delegate_hotel_search. If a tool returns auth_denied, explain the AUTH_ERROR to the user and continue with permitted sections only. If mesh_auth_denied is set in state, respond with that message. Produce a concise trip plan with flights and hotels when allowed.\", \"tools\": [{\"function_declarations\": [{\"description\": \"Delegate flight search to the flight-researcher specialist.\\n\\nArgs:\\n    origin: Departure city (e.g. NYC).\\n    destination: Arrival city (e.g. San Francisco).\\n\\nReturns:\\n    Flight options or AUTH_ERROR when persona lacks permission.\", \"name\": \"delegate_flight_search\", \"parameters_json_schema\": {\"properties\": {\"origin\": {\"title\": \"Origin\", \"type\": \"string\"}, \"destination\": {\"title\": \"Destination\", \"type\": \"string\"}}, \"required\": [\"origin\", \"destination\"], \"title\": \"delegate_flight_searchParams\", \"type\": \"object\"}, \"response_json_schema\": {\"additionalProperties\": true, \"type\": \"object\"}}]}, {\"function_declarations\": [{\"description\": \"Delegate hotel search to the hotel-researcher specialist.\\n\\nArgs:\\n    city: Destination city for lodging.\\n\\nReturns:\\n    Hotel options or AUTH_ERROR when persona lacks permission.\", \"name\": \"delegate_hotel_search\", \"parameters_json_schema\": {\"properties\": {\"city\": {\"title\": \"City\", \"type\": \"string\"}}, \"required\": [\"city\"], \"title\": \"delegate_hotel_searchParams\", \"type\": \"object\"}, \"response_json_schema\": {\"additionalProperties\": true, \"type\": \"object\"}}]}], \"sub_agents\": []}}, \"turns\": [{\"turn_index\": 0, \"turn_id\": \"turn_0\", \"events\": [{\"author\": \"root_agent\", \"content\": {\"parts\": [{\"function_call\": {\"id\": \"adk-40f18766-2a0a-491f-8f9e-88a2f92c3757\", \"args\": {\"origin\": \"NYC\", \"destination\": \"San Francisco\"}, \"name\": \"delegate_flight_search\"}}], \"role\": \"model\"}}, {\"author\": \"root_agent\", \"content\": {\"parts\": [{\"function_response\": {\"id\": \"adk-40f18766-2a0a-491f-8f9e-88a2f92c3757\", \"name\": \"delegate_flight_search\", \"response\": {\"status\": \"ok\", \"source\": \"mock_delegate\", \"flights\": [{\"airline\": \"Mesh Air\", \"origin\": \"NYC\", \"destination\": \"SAN FRANCISCO\", \"price_usd\": 320}]}}}], \"role\": \"user\"}}, {\"author\": \"root_agent\", \"content\": {\"parts\": [{\"function_call\": {\"id\": \"adk-cabc429f-cc92-4f60-94ac-de881df08036\", \"args\": {\"city\": \"San Francisco\"}, \"name\": \"delegate_hotel_search\"}}], \"role\": \"model\"}}, {\"author\": \"root_agent\", \"content\": {\"parts\": [{\"function_response\": {\"id\": \"adk-cabc429f-cc92-4f60-94ac-de881df08036\", \"name\": \"delegate_hotel_search\", \"response\": {\"status\": \"ok\", \"source\": \"mock_delegate\", \"hotels\": [{\"name\": \"Mesh Downtown Hotel\", \"city\": \"San Francisco\", \"nightly_usd\": 189}]}}}], \"role\": \"user\"}}, {\"author\": \"root_agent\", \"content\": {\"parts\": [{\"text\": \"Here is your concise trip plan from NYC to San Francisco, including flight and hotel options:\\n\\n### Flights\\n\\n*   **Airline:** Mesh Air\\n*   **Route:** NYC to SAN FRANCISCO\\n*   **Price:** $320\\n\\n### Hotels in San Francisco\\n\\n*   **Hotel:** Mesh Downtown Hotel\\n*   **Nightly Price:** $189\"}], \"role\": \"model\"}}]}]}"
+      },
+      {
+        "prompt_display_text": "Plan NYC to San Francisco with flights and hotels. User persona is mesh-flight-user.",
+        "prompt_raw_json": "{\n  \"parts\": [\n    {\n      \"text\": \"Plan NYC to San Francisco with flights and hotels. User persona is mesh-flight-user.\"\n    }\n  ],\n  \"role\": \"user\"\n}",
+        "reference": "",
+        "reference_raw_json": "",
+        "response_display_text": "Here is your trip plan from NYC to San Francisco:\n\n**Flights:**\n\n*   **Airline:** Mesh Air\n*   **Price:** $320\n\n**Hotels in San Francisco:**\n\n*   **Hotel:** Mesh Downtown Hotel\n*   **Nightly Price:** $189",
+        "response_raw_json": "{\n  \"parts\": [\n    {\n      \"text\": \"Here is your trip plan from NYC to San Francisco:\\n\\n**Flights:**\\n\\n*   **Airline:** Mesh Air\\n*   **Price:** $320\\n\\n**Hotels in San Francisco:**\\n\\n*   **Hotel:** Mesh Downtown Hotel\\n*   **Nightly Price:** $189\"\n    }\n  ],\n  \"role\": \"model\"\n}",
+        "intermediate_events": null,
+        "agent_data": "{\"agents\": {\"root_agent\": {\"agent_id\": \"root_agent\", \"agent_type\": \"LlmAgent\", \"description\": \"Orchestrates trip planning by delegating to flight and hotel specialists.\", \"instruction\": \"You are the trip-planner orchestrator. For trips, call delegate_flight_search and delegate_hotel_search. If a tool returns auth_denied, explain the AUTH_ERROR to the user and continue with permitted sections only. If mesh_auth_denied is set in state, respond with that message. Produce a concise trip plan with flights and hotels when allowed.\", \"tools\": [{\"function_declarations\": [{\"description\": \"Delegate flight search to the flight-researcher specialist.\\n\\nArgs:\\n    origin: Departure city (e.g. NYC).\\n    destination: Arrival city (e.g. San Francisco).\\n\\nReturns:\\n    Flight options or AUTH_ERROR when persona lacks permission.\", \"name\": \"delegate_flight_search\", \"parameters_json_schema\": {\"properties\": {\"origin\": {\"title\": \"Origin\", \"type\": \"string\"}, \"destination\": {\"title\": \"Destination\", \"type\": \"string\"}}, \"required\": [\"origin\", \"destination\"], \"title\": \"delegate_flight_searchParams\", \"type\": \"object\"}, \"response_json_schema\": {\"additionalProperties\": true, \"type\": \"object\"}}]}, {\"function_declarations\": [{\"description\": \"Delegate hotel search to the hotel-researcher specialist.\\n\\nArgs:\\n    city: Destination city for lodging.\\n\\nReturns:\\n    Hotel options or AUTH_ERROR when persona lacks permission.\", \"name\": \"delegate_hotel_search\", \"parameters_json_schema\": {\"properties\": {\"city\": {\"title\": \"City\", \"type\": \"string\"}}, \"required\": [\"city\"], \"title\": \"delegate_hotel_searchParams\", \"type\": \"object\"}, \"response_json_schema\": {\"additionalProperties\": true, \"type\": \"object\"}}]}], \"sub_agents\": []}}, \"turns\": [{\"turn_index\": 0, \"turn_id\": \"turn_0\", \"events\": [{\"author\": \"root_agent\", \"content\": {\"parts\": [{\"function_call\": {\"id\": \"adk-8f677832-4bc3-4504-92a2-bdc8570c9a3f\", \"args\": {\"origin\": \"NYC\", \"destination\": \"San Francisco\"}, \"name\": \"delegate_flight_search\"}}, {\"function_call\": {\"id\": \"adk-61f7a944-5a78-4b4f-bb41-cebbba993230\", \"args\": {\"city\": \"San Francisco\"}, \"name\": \"delegate_hotel_search\"}}], \"role\": \"model\"}}, {\"author\": \"root_agent\", \"content\": {\"parts\": [{\"function_response\": {\"id\": \"adk-8f677832-4bc3-4504-92a2-bdc8570c9a3f\", \"name\": \"delegate_flight_search\", \"response\": {\"status\": \"ok\", \"source\": \"mock_delegate\", \"flights\": [{\"airline\": \"Mesh Air\", \"origin\": \"NYC\", \"destination\": \"SAN FRANCISCO\", \"price_usd\": 320}]}}}, {\"function_response\": {\"id\": \"adk-61f7a944-5a78-4b4f-bb41-cebbba993230\", \"name\": \"delegate_hotel_search\", \"response\": {\"status\": \"ok\", \"source\": \"mock_delegate\", \"hotels\": [{\"name\": \"Mesh Downtown Hotel\", \"city\": \"San Francisco\", \"nightly_usd\": 189}]}}}], \"role\": \"user\"}}, {\"author\": \"root_agent\", \"content\": {\"parts\": [{\"text\": \"Here is your trip plan from NYC to San Francisco:\\n\\n**Flights:**\\n\\n*   **Airline:** Mesh Air\\n*   **Price:** $320\\n\\n**Hotels in San Francisco:**\\n\\n*   **Hotel:** Mesh Downtown Hotel\\n*   **Nightly Price:** $189\"}], \"role\": \"model\"}}]}]}"
+      }
+    ]
+  },
+  "agent_info": null
+}

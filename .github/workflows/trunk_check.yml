@@ -22,5 +22,17 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v6
 
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      - name: Install Python dependencies
+        run: |
+          bash dev/setup.sh --deps "development"
+          for agent_dir in src/flight-researcher src/hotel-researcher src/trip-planner; do
+            (cd "${agent_dir}" && uv sync)
+          done
+
       - name: Trunk Check
         uses: trunk-io/trunk-action@v1

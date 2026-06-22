@@ -1,0 +1,11 @@
+{
+  "eval_cases": [
+    {
+      "eval_case_id": "hotel_sfo",
+      "prompt": {
+        "role": "user",
+        "parts": [{ "text": "Find hotels in San Francisco for July 1-5." }]
+      }
+    }
+  ]
+}

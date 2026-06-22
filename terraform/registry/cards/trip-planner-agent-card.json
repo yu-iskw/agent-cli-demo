@@ -1,0 +1,21 @@
+{
+  "name": "trip-planner",
+  "version": "0.1.0",
+  "description": "Orchestrates trip planning by delegating to flight and hotel specialists.",
+  "protocolVersion": "0.3.0",
+  "preferredTransport": "HTTP+JSON",
+  "defaultInputModes": ["text/plain"],
+  "defaultOutputModes": ["text/plain"],
+  "url": "https://REGION-aiplatform.googleapis.com/v1/projects/PROJECT/locations/REGION/reasoningEngines/ENGINE_ID",
+  "capabilities": {
+    "streaming": false
+  },
+  "skills": [
+    {
+      "id": "root_agent",
+      "name": "model",
+      "description": "Trip planner orchestrator",
+      "tags": ["llm"]
+    }
+  ]
+}

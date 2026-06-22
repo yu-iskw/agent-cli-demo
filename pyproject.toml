@@ -64,6 +64,7 @@ dev = [
   "pylint>=3.3.5",
   "vulture>=2.16",
   "ssort>=0.16.0",
+  "types-protobuf>=7.34.1",
 ]
 
 [tool.pyright]
@@ -76,13 +77,44 @@ venv = ".venv"
 reportMissingImports = true
 reportMissingTypeStubs = "warning"
 
+[[tool.pyright.executionEnvironments]]
+root = "src/flight-researcher"
+extraPaths = [
+  "src/flight-researcher",
+  "src/flight-researcher/.venv/lib/python3.12/site-packages",
+  "src/flight-researcher/.venv/lib/python3.13/site-packages",
+]
+pythonVersion = "3.12"
+
+[[tool.pyright.executionEnvironments]]
+root = "src/hotel-researcher"
+extraPaths = [
+  "src/hotel-researcher",
+  "src/hotel-researcher/.venv/lib/python3.12/site-packages",
+  "src/hotel-researcher/.venv/lib/python3.13/site-packages",
+]
+pythonVersion = "3.12"
+
+[[tool.pyright.executionEnvironments]]
+root = "src/trip-planner"
+extraPaths = [
+  "src/trip-planner",
+  "src/trip-planner/.venv/lib/python3.12/site-packages",
+  "src/trip-planner/.venv/lib/python3.13/site-packages",
+]
+pythonVersion = "3.12"
+
 [tool.vulture]
-paths = ["src/your_package"]
+paths = [
+  "src/flight-researcher/app",
+  "src/hotel-researcher/app",
+  "src/trip-planner/app",
+]
 min_confidence = 80
 
 [tool.coverage.run]
 branch = true
-source = ["src/your_package"]
+source = ["src"]
 
 [tool.coverage.report]
 show_missing = true

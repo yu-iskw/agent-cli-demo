@@ -1,0 +1,35 @@
+{
+  "skills": [
+    {
+      "tags": ["llm"],
+      "examples": [],
+      "description": "Searches hotels in a destination city for the trip-planner mesh. I am the hotel-researcher specialist. Use search_hotels for lodging. If state mesh_auth_denied is set, respond with that message only. Summarize options with nightly rate and rating.",
+      "id": "root_agent",
+      "name": "model"
+    },
+    {
+      "id": "root_agent-search_hotels",
+      "description": "Search hotel availability in a city.\n\nArgs:\n    city: Destination city (e.g. San Francisco).\n    check_in: Check-in date (ISO format).\n    check_out: Check-out date (ISO format).\n\nReturns:\n    Hotel options with name, price, and rating.",
+      "tags": ["llm", "tools"],
+      "name": "search_hotels"
+    }
+  ],
+  "protocolVersion": "0.3.0",
+  "defaultInputModes": ["text/plain"],
+  "supportsAuthenticatedExtendedCard": true,
+  "description": "Searches hotels in a destination city for the trip-planner mesh.",
+  "capabilities": {
+    "streaming": false,
+    "extensions": [
+      {
+        "uri": "https://google.github.io/adk-docs/a2a/a2a-extension/",
+        "description": "Ability to use the new agent executor implementation"
+      }
+    ]
+  },
+  "version": "0.1.0",
+  "url": "https://REGION-aiplatform.googleapis.com/v1beta1/projects/PROJECT/locations/REGION/reasoningEngines/ENGINE_ID/a2a",
+  "defaultOutputModes": ["text/plain"],
+  "name": "root_agent",
+  "preferredTransport": "HTTP+JSON"
+}

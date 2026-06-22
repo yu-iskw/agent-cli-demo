@@ -1,0 +1,35 @@
+{
+  "url": "https://REGION-aiplatform.googleapis.com/v1beta1/projects/PROJECT/locations/REGION/reasoningEngines/ENGINE_ID/a2a",
+  "capabilities": {
+    "streaming": false,
+    "extensions": [
+      {
+        "uri": "https://google.github.io/adk-docs/a2a/a2a-extension/",
+        "description": "Ability to use the new agent executor implementation"
+      }
+    ]
+  },
+  "skills": [
+    {
+      "description": "Searches flights between cities for the trip-planner mesh. Use search_flights for routes. Summarize options clearly with price and departure time.",
+      "tags": ["llm"],
+      "name": "model",
+      "examples": [],
+      "id": "root_agent"
+    },
+    {
+      "description": "Search available flights between two cities.\n\nArgs:\n    origin: Departure city or airport code (e.g. NYC).\n    destination: Arrival city or airport code (e.g. SFO).\n\nReturns:\n    Flight options with airline, times, and price.",
+      "tags": ["llm", "tools"],
+      "id": "root_agent-search_flights",
+      "name": "search_flights"
+    }
+  ],
+  "supportsAuthenticatedExtendedCard": true,
+  "description": "Searches flights between cities for the trip-planner mesh.",
+  "protocolVersion": "0.3.0",
+  "defaultInputModes": ["text/plain"],
+  "defaultOutputModes": ["text/plain"],
+  "preferredTransport": "HTTP+JSON",
+  "name": "root_agent",
+  "version": "0.1.0"
+}

@@ -23,6 +23,19 @@ lint:
     - isort
     - black
     - mypy
+  ignore:
+    - linters: [semgrep]
+      paths:
+        - .claude/hooks/**
+        - .claude/settings.json
+        - src/**/artifacts/grade_results/**
+    - linters: [markdownlint]
+      paths:
+        - .claude/skills/agent-cli/**
+    - linters: [trivy]
+      paths:
+        - src/**/deployment/terraform/**
+        - terraform/iam.tf
   enabled:
     - actionlint@1.7.12
     - markdown-link-check@3.14.2

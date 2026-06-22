@@ -1,0 +1,11 @@
+{
+  "eval_cases": [
+    {
+      "eval_case_id": "flight_nyc_sfo",
+      "prompt": {
+        "role": "user",
+        "parts": [{ "text": "Find flights from NYC to San Francisco in July." }]
+      }
+    }
+  ]
+}

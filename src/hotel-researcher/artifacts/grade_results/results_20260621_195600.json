@@ -1,0 +1,302 @@
+{
+  "eval_case_results": [
+    {
+      "eval_case_index": 0,
+      "response_candidate_results": [
+        {
+          "response_index": 0,
+          "metric_results": {
+            "custom_response_quality": {
+              "metric_name": "custom_response_quality",
+              "score": 5.0,
+              "explanation": "The agent correctly identified the user's intent to find hotels, extracted the city and dates (using sensible defaults for the year since it wasn't specified), and utilized the `search_hotels` tool. The tool's response provided relevant hotel options, which the agent then accurately and clearly summarized in the final response, including the name, nightly rate, and rating for each, as per its instructions. The response is comprehensive, accurate, and well-formatted.",
+              "rubric_verdicts": null,
+              "raw_output": null,
+              "error_message": null
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "summary_metrics": [
+    {
+      "metric_name": "custom_response_quality",
+      "num_cases_total": 1,
+      "num_cases_valid": 1,
+      "num_cases_error": 0,
+      "mean_score": 5.0,
+      "stdev_score": null,
+      "pass_rate": null
+    }
+  ],
+  "win_rates": null,
+  "evaluation_dataset": [
+    {
+      "bigquery_source": null,
+      "gcs_source": null,
+      "eval_cases": [
+        {
+          "prompt": {
+            "parts": [
+              {
+                "media_resolution": null,
+                "code_execution_result": null,
+                "executable_code": null,
+                "file_data": null,
+                "function_call": null,
+                "function_response": null,
+                "inline_data": null,
+                "text": "Find hotels in San Francisco for July 1-5.",
+                "thought": null,
+                "thought_signature": null,
+                "video_metadata": null,
+                "tool_call": null,
+                "tool_response": null,
+                "part_metadata": null
+              }
+            ],
+            "role": "user"
+          },
+          "responses": [
+            {
+              "response": {
+                "parts": [
+                  {
+                    "media_resolution": null,
+                    "code_execution_result": null,
+                    "executable_code": null,
+                    "file_data": null,
+                    "function_call": null,
+                    "function_response": null,
+                    "inline_data": null,
+                    "text": "Here are a couple of hotel options in San Francisco for July 1-5:\n\n*   **Mesh Downtown Hotel:** $189 nightly rate, 4.5 rating.\n*   **Demo Suites:** $142 nightly rate, 4.1 rating.",
+                    "thought": null,
+                    "thought_signature": null,
+                    "video_metadata": null,
+                    "tool_call": null,
+                    "tool_response": null,
+                    "part_metadata": null
+                  }
+                ],
+                "role": "model"
+              }
+            }
+          ],
+          "reference": null,
+          "system_instruction": null,
+          "conversation_history": null,
+          "rubric_groups": null,
+          "eval_case_id": "hotel_sfo",
+          "intermediate_events": null,
+          "agent_info": null,
+          "agent_data": {
+            "agents": {
+              "root_agent": {
+                "agent_id": "root_agent",
+                "agent_type": "LlmAgent",
+                "description": "Searches hotels in a destination city for the trip-planner mesh.",
+                "instruction": "You are the hotel-researcher specialist. Use search_hotels for lodging. If state mesh_auth_denied is set, respond with that message only. Summarize options with nightly rate and rating.",
+                "tools": [
+                  {
+                    "retrieval": null,
+                    "computer_use": null,
+                    "file_search": null,
+                    "google_search": null,
+                    "google_maps": null,
+                    "code_execution": null,
+                    "enterprise_web_search": null,
+                    "function_declarations": [
+                      {
+                        "description": "Search hotel availability in a city.\n\nArgs:\n    city: Destination city (e.g. San Francisco).\n    check_in: Check-in date (ISO format).\n    check_out: Check-out date (ISO format).\n\nReturns:\n    Hotel options with name, price, and rating.",
+                        "name": "search_hotels",
+                        "parameters": null,
+                        "parameters_json_schema": {
+                          "properties": {
+                            "city": {
+                              "title": "City",
+                              "type": "string"
+                            },
+                            "check_in": {
+                              "default": "2026-07-01",
+                              "title": "Check In",
+                              "type": "string"
+                            },
+                            "check_out": {
+                              "default": "2026-07-05",
+                              "title": "Check Out",
+                              "type": "string"
+                            }
+                          },
+                          "required": ["city"],
+                          "title": "search_hotelsParams",
+                          "type": "object"
+                        },
+                        "response": null,
+                        "response_json_schema": {
+                          "additionalProperties": true,
+                          "type": "object"
+                        },
+                        "behavior": null
+                      }
+                    ],
+                    "google_search_retrieval": null,
+                    "parallel_ai_search": null,
+                    "url_context": null,
+                    "mcp_servers": null
+                  }
+                ],
+                "sub_agents": []
+              }
+            },
+            "turns": [
+              {
+                "turn_index": 0,
+                "turn_id": "turn_0",
+                "events": [
+                  {
+                    "author": "root_agent",
+                    "content": {
+                      "parts": [
+                        {
+                          "media_resolution": null,
+                          "code_execution_result": null,
+                          "executable_code": null,
+                          "file_data": null,
+                          "function_call": {
+                            "id": "adk-446dee91-3e1c-4bb3-b0a1-213ce2793287",
+                            "args": {
+                              "city": "San Francisco"
+                            },
+                            "name": "search_hotels",
+                            "partial_args": null,
+                            "will_continue": null
+                          },
+                          "function_response": null,
+                          "inline_data": null,
+                          "text": null,
+                          "thought": null,
+                          "thought_signature": null,
+                          "video_metadata": null,
+                          "tool_call": null,
+                          "tool_response": null,
+                          "part_metadata": null
+                        }
+                      ],
+                      "role": "model"
+                    },
+                    "event_time": null,
+                    "state_delta": null,
+                    "active_tools": null
+                  },
+                  {
+                    "author": "root_agent",
+                    "content": {
+                      "parts": [
+                        {
+                          "media_resolution": null,
+                          "code_execution_result": null,
+                          "executable_code": null,
+                          "file_data": null,
+                          "function_call": null,
+                          "function_response": {
+                            "will_continue": null,
+                            "scheduling": null,
+                            "parts": null,
+                            "id": "adk-446dee91-3e1c-4bb3-b0a1-213ce2793287",
+                            "name": "search_hotels",
+                            "response": {
+                              "status": "ok",
+                              "city": "San Francisco",
+                              "check_in": "2026-07-01",
+                              "check_out": "2026-07-05",
+                              "hotels": [
+                                {
+                                  "name": "Mesh Downtown Hotel",
+                                  "city": "San Francisco",
+                                  "nightly_usd": 189,
+                                  "rating": 4.5
+                                },
+                                {
+                                  "name": "Demo Suites",
+                                  "city": "San Francisco",
+                                  "nightly_usd": 142,
+                                  "rating": 4.1
+                                }
+                              ]
+                            }
+                          },
+                          "inline_data": null,
+                          "text": null,
+                          "thought": null,
+                          "thought_signature": null,
+                          "video_metadata": null,
+                          "tool_call": null,
+                          "tool_response": null,
+                          "part_metadata": null
+                        }
+                      ],
+                      "role": "user"
+                    },
+                    "event_time": null,
+                    "state_delta": null,
+                    "active_tools": null
+                  },
+                  {
+                    "author": "root_agent",
+                    "content": {
+                      "parts": [
+                        {
+                          "media_resolution": null,
+                          "code_execution_result": null,
+                          "executable_code": null,
+                          "file_data": null,
+                          "function_call": null,
+                          "function_response": null,
+                          "inline_data": null,
+                          "text": "Here are a couple of hotel options in San Francisco for July 1-5:\n\n*   **Mesh Downtown Hotel:** $189 nightly rate, 4.5 rating.\n*   **Demo Suites:** $142 nightly rate, 4.1 rating.",
+                          "thought": null,
+                          "thought_signature": null,
+                          "video_metadata": null,
+                          "tool_call": null,
+                          "tool_response": null,
+                          "part_metadata": null
+                        }
+                      ],
+                      "role": "model"
+                    },
+                    "event_time": null,
+                    "state_delta": null,
+                    "active_tools": null
+                  }
+                ]
+              }
+            ]
+          },
+          "user_scenario": null
+        }
+      ],
+      "eval_dataset_df": null,
+      "candidate_name": null
+    }
+  ],
+  "metadata": {
+    "candidate_names": ["candidate_1"],
+    "dataset_name": null,
+    "dataset_id": null,
+    "creation_timestamp": "2026-06-21T10:56:00.407871Z",
+    "dataset": [
+      {
+        "prompt_display_text": "Find hotels in San Francisco for July 1-5.",
+        "prompt_raw_json": "{\n  \"parts\": [\n    {\n      \"text\": \"Find hotels in San Francisco for July 1-5.\"\n    }\n  ],\n  \"role\": \"user\"\n}",
+        "reference": "",
+        "reference_raw_json": "",
+        "response_display_text": "Here are a couple of hotel options in San Francisco for July 1-5:\n\n*   **Mesh Downtown Hotel:** $189 nightly rate, 4.5 rating.\n*   **Demo Suites:** $142 nightly rate, 4.1 rating.",
+        "response_raw_json": "{\n  \"parts\": [\n    {\n      \"text\": \"Here are a couple of hotel options in San Francisco for July 1-5:\\n\\n*   **Mesh Downtown Hotel:** $189 nightly rate, 4.5 rating.\\n*   **Demo Suites:** $142 nightly rate, 4.1 rating.\"\n    }\n  ],\n  \"role\": \"model\"\n}",
+        "intermediate_events": null,
+        "agent_data": "{\"agents\": {\"root_agent\": {\"agent_id\": \"root_agent\", \"agent_type\": \"LlmAgent\", \"description\": \"Searches hotels in a destination city for the trip-planner mesh.\", \"instruction\": \"You are the hotel-researcher specialist. Use search_hotels for lodging. If state mesh_auth_denied is set, respond with that message only. Summarize options with nightly rate and rating.\", \"tools\": [{\"function_declarations\": [{\"description\": \"Search hotel availability in a city.\\n\\nArgs:\\n    city: Destination city (e.g. San Francisco).\\n    check_in: Check-in date (ISO format).\\n    check_out: Check-out date (ISO format).\\n\\nReturns:\\n    Hotel options with name, price, and rating.\", \"name\": \"search_hotels\", \"parameters_json_schema\": {\"properties\": {\"city\": {\"title\": \"City\", \"type\": \"string\"}, \"check_in\": {\"default\": \"2026-07-01\", \"title\": \"Check In\", \"type\": \"string\"}, \"check_out\": {\"default\": \"2026-07-05\", \"title\": \"Check Out\", \"type\": \"string\"}}, \"required\": [\"city\"], \"title\": \"search_hotelsParams\", \"type\": \"object\"}, \"response_json_schema\": {\"additionalProperties\": true, \"type\": \"object\"}}]}], \"sub_agents\": []}}, \"turns\": [{\"turn_index\": 0, \"turn_id\": \"turn_0\", \"events\": [{\"author\": \"root_agent\", \"content\": {\"parts\": [{\"function_call\": {\"id\": \"adk-446dee91-3e1c-4bb3-b0a1-213ce2793287\", \"args\": {\"city\": \"San Francisco\"}, \"name\": \"search_hotels\"}}], \"role\": \"model\"}}, {\"author\": \"root_agent\", \"content\": {\"parts\": [{\"function_response\": {\"id\": \"adk-446dee91-3e1c-4bb3-b0a1-213ce2793287\", \"name\": \"search_hotels\", \"response\": {\"status\": \"ok\", \"city\": \"San Francisco\", \"check_in\": \"2026-07-01\", \"check_out\": \"2026-07-05\", \"hotels\": [{\"name\": \"Mesh Downtown Hotel\", \"city\": \"San Francisco\", \"nightly_usd\": 189, \"rating\": 4.5}, {\"name\": \"Demo Suites\", \"city\": \"San Francisco\", \"nightly_usd\": 142, \"rating\": 4.1}]}}}], \"role\": \"user\"}}, {\"author\": \"root_agent\", \"content\": {\"parts\": [{\"text\": \"Here are a couple of hotel options in San Francisco for July 1-5:\\n\\n*   **Mesh Downtown Hotel:** $189 nightly rate, 4.5 rating.\\n*   **Demo Suites:** $142 nightly rate, 4.1 rating.\"}], \"role\": \"model\"}}]}]}"
+      }
+    ]
+  },
+  "agent_info": null
+}
