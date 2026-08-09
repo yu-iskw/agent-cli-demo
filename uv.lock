@@ -290,7 +290,7 @@ name = "exceptiongroup"
 version = "1.3.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "typing-extensions", marker = "python_full_version < '3.11'" },
+    { name = "typing-extensions" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/50/79/66800aadf48771f6b62f7eb014e352e5d06856655206165d775e675a02c9/exceptiongroup-1.3.1.tar.gz", hash = "sha256:8b412432c6055b0b7d14c310000ae93352ed6754f70fa8f7c34141f91c4e3219", size = 30371, upload-time = "2025-11-21T23:01:54.787Z" }
 wheels = [
@@ -625,14 +625,14 @@ wheels = [
 
 [[package]]
 name = "ssort"
-version = "0.16.0"
+version = "0.17.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "pathspec" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/7a/c0/696b3c20b58f4a536845bbfded3be1d7a2b99e622ac51755e402c43729f0/ssort-0.16.0.tar.gz", hash = "sha256:1e7222cf7ffbbb0523d88fe1931a36b0bbd7f478d2964feb25be3621c52a981f", size = 23252, upload-time = "2025-12-07T02:20:00.092Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/1a/6d/635cb5cf18f84f514ff085d7856bbc293f4671e00c29b6648221106ead48/ssort-0.17.0.tar.gz", hash = "sha256:acfb38409476520c3e25541c282f7cef92017900d859f6b12bea48da4334b194", size = 23363, upload-time = "2026-08-03T12:06:45.674Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/5c/45/a23b1c13f2416e060af4d90e8407a350d5da7ad1ccf33e6eb9cbaaf7b363/ssort-0.16.0-py3-none-any.whl", hash = "sha256:013d57d4a0e4bde896afbcaa1e9e98a6829bf1b63ddcccecfcb7e64336921bba", size = 27683, upload-time = "2025-12-07T02:19:59.139Z" },
+    { url = "https://files.pythonhosted.org/packages/82/0b/ba965b79d65aecf00b12e8de7c98a46f62d2c575f55b576105010b152ef4/ssort-0.17.0-py3-none-any.whl", hash = "sha256:acb57f75cf9521d80a3cf1572ad4cdb969b28d08d8c4c08957c91517c5dd5d93", size = 27799, upload-time = "2026-08-03T12:06:44.581Z" },
 ]
 
 [[package]]
