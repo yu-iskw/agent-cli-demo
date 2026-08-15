@@ -71,11 +71,9 @@ jobs:
       - name: Test build
         run: uv run bash dev/build.sh
       - name: Install agent workspace dependencies for Trunk
-        if: github.event_name != 'push'
         run: |
           for agent_dir in src/flight-researcher src/hotel-researcher src/trip-planner; do
             (cd "${agent_dir}" && uv sync)
           done
       - name: Trunk Check
-        if: github.event_name != 'push'
         uses: trunk-io/trunk-action@v1
